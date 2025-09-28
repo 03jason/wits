@@ -1,0 +1,18 @@
+Démarrage rapide (dev)
+
+1) Lance Docker Desktop
+Attends que l’engine soit “running”.
+
+2) API + DB (dans WITS/infra)
+
+cd /c/wamp64/www/WITS/infra
+docker compose up -d db adminer products-api movements-api
+# (équivalent: `docker compose start` si les conteneurs existent déjà)
+
+3) Front Vite (dans WITS/web)
+
+cd /c/wamp64/www/WITS/web
+npm run dev
+
+Ouvre :
+http://localhost:5173

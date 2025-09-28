@@ -1,0 +1,11 @@
+.DS_Store
+Thumbs.db
+
+
+
+web/node_modules/
+web/dist/
+services/**/vendor/
+services/**/.env
+services/**/.env.*
+infra/.env

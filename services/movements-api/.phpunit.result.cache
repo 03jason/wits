@@ -1,0 +1,1 @@
+{"version":2,"defects":[],"times":{"EnsureOutRuleTest::test_out_cannot_exceed_stock":1.794,"EnsureOutRuleTest::test_out_equal_or_below_stock_is_ok":0.083,"EnsureOutRuleTest::test_quantity_must_be_positive":0}}

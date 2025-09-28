@@ -1,0 +1,61 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: wits
+      MYSQL_USER: wits
+      MYSQL_PASSWORD: wits
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"   # au lieu de 3306:3306
+    volumes:
+      - db_data:/var/lib/mysql
+      - ../db/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uwits -pwits || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  adminer:
+    image: adminer
+    ports: ["8080:8080"]
+    depends_on: [db]
+
+
+  movements-api:
+    build:
+      context: ..
+      dockerfile: infra/movements-api.Dockerfile
+    #env_file:
+    #  - ../services/movements-api/.env
+    volumes:
+      - ../services/movements-api:/var/www
+      - ../db:/var/www/db:ro
+    ports:
+      - "8082:8082"
+    depends_on:
+      db:
+        condition: service_healthy
+
+
+  products-api:
+    build:
+      context: ..
+      dockerfile: infra/products-api.Dockerfile
+    #env_file:
+    #  - ../services/products-api/.env
+    volumes:
+      - ../services/products-api:/var/www
+      - ../db:/var/www/db:ro
+    ports:
+      - "8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
+
+
+

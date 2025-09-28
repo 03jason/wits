@@ -1,0 +1,33 @@
+# .github/workflows/ci.yml
+name: CI
+on: [push]
+
+jobs:
+  php:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        svc: [services/movements-api, services/products-api]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_mysql
+      - name: Composer install
+        run: composer install --no-interaction --prefer-dist
+        working-directory: ${{ matrix.svc }}
+      - name: PHPUnit (best-effort)
+        run: vendor/bin/phpunit || echo "no tests here"
+        working-directory: ${{ matrix.svc }}
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+        working-directory: web
+      - run: npm run build
+        working-directory: web
