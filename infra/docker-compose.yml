@@ -6,6 +6,7 @@ services:
       MYSQL_USER: wits
       MYSQL_PASSWORD: wits
       MYSQL_ROOT_PASSWORD: root
+
     ports:
       - "3307:3306"   # au lieu de 3306:3306
     volumes:
@@ -39,6 +40,11 @@ services:
         condition: service_healthy
 
 
+    environment:
+      - APP_VERSION=0.1.0-dev
+
+
+
   products-api:
     build:
       context: ..
@@ -53,9 +59,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    environment:
+      - APP_VERSION=0.1.0-dev
+
+
 
 volumes:
   db_data:
+
 
 
 

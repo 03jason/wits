@@ -33,4 +33,23 @@ export default function LoginBar() {
             <button type="button" onClick={logout}>Logout</button>
         </form>
     );
+
+
+    // … imports existants …
+    export default function LoginBar() {
+        // … state & login existants …
+        const logout = () => {
+            localStorage.removeItem('wits_token');
+            window.location.reload();
+        };
+
+        return (
+            <div className="loginbar">
+                {/* … inputs email / password + bouton Login … */}
+                <button onClick={logout}>Logout</button>
+            </div>
+        );
+    }
+
+
 }

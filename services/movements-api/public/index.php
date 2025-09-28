@@ -68,4 +68,15 @@ $app->get('/api/health', fn(Request $q, Response $r) => j($r, ['ok'=>true,'servi
 $app->get('/api/movements', [Wits\Controllers\MovementController::class, 'list']);
 $protect($app->post('/api/movements', [Wits\Controllers\MovementController::class, 'create']));
 
+$app->get('/api/version', fn($q,$s)=>json($s,[
+    'service'=>'products-api', // adapter
+    'version'=>$_ENV['APP_VERSION'] ?? 'dev'
+]));
+
+$app->get('/api/version', fn($req,$res)=>json($res, [
+    'service' => 'movements-api',
+    'version' => $_ENV['APP_VERSION'] ?? 'dev',
+]));
+
+
 $app->run();

@@ -110,4 +110,17 @@ $protect($app->post('/api/products', [Wits\Controllers\ProductController::class,
 $protect($app->put('/api/products/{id}', [Wits\Controllers\ProductController::class, 'update']));
 $protect($app->delete('/api/products/{id}', [Wits\Controllers\ProductController::class, 'delete']));
 
+
+$app->get('/api/version', fn($q,$s)=>json($s,[
+    'service'=>'products-api', // adapter
+    'version'=>$_ENV['APP_VERSION'] ?? 'dev'
+]));
+
+$app->get('/api/version', fn($req,$res)=>json($res, [
+    'service' => 'products-api',
+    'version' => $_ENV['APP_VERSION'] ?? 'dev',
+]));
+
+
+
 $app->run();
