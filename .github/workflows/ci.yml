@@ -1,24 +1,17 @@
-# .github/workflows/ci.yml
 name: CI
 on: [push]
 
 jobs:
   php:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        svc: [services/movements-api, services/products-api]
+    strategy: { matrix: { svc: [services/movements-api, services/products-api] } }
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-          extensions: mbstring, pdo_mysql
-      - name: Composer install
-        run: composer install --no-interaction --prefer-dist
+        with: { php-version: '8.3', extensions: mbstring, pdo_mysql }
+      - run: composer install --no-interaction --prefer-dist
         working-directory: ${{ matrix.svc }}
-      - name: PHPUnit (best-effort)
-        run: vendor/bin/phpunit || echo "no tests here"
+      - run: vendor/bin/phpunit || echo "no tests here"
         working-directory: ${{ matrix.svc }}
 
   web:
@@ -29,5 +22,9 @@ jobs:
         with: { node-version: 20 }
       - run: npm ci
         working-directory: web
-      - run: npm run build
+      - name: Build web (deterministic)
+        run: |
+          VITE_PRODUCTS_API_URL=http://localhost:8081 \
+          VITE_MOVEMENTS_API_URL=http://localhost:8082 \
+          npm run build
         working-directory: web
