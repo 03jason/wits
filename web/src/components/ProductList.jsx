@@ -3,7 +3,17 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../api/client';
 
 /** Liste des produits (enrichie) + Edit/Delete minimal */
-export default function ProductList({ onSelect }) {
+export default function ProductList({ onSelect, refreshKey }) {
+
+
+    // Chargement initial
+    useEffect(() => { load(1, ''); /* reset page + q si tu veux */ }, []);
+
+    // 🔁 Rechargement quand refreshKey change
+    useEffect(() => { load(1, ''); }, [refreshKey]);
+
+    // Dans editRow/deleteRow on a déjà: await load(page, q);
+
     const [q, setQ] = useState('');
     const [page, setPage] = useState(1);
     const [size] = useState(10);
@@ -63,18 +73,6 @@ export default function ProductList({ onSelect }) {
         }
     };
 
-    // web/src/components/ProductList.jsx
-    export default function ProductList({ onSelect, refreshKey }) {
-        // ... état + load() inchangés ...
-
-        // Chargement initial
-        useEffect(() => { load(1, ''); /* reset page + q si tu veux */ }, []);
-
-        // 🔁 Rechargement quand refreshKey change
-        useEffect(() => { load(1, ''); }, [refreshKey]);
-
-        // Dans editRow/deleteRow on a déjà: await load(page, q);
-    }
 
 
     return (
