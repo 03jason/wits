@@ -1,0 +1,58 @@
+1) “Remise en route” après reboot (Windows)
+# 1) Services
+cd /c/wamp64/www/WITS/infra
+docker compose up -d --build db products-api movements-api adminer
+------------------------------------------------------------------------------------------------------------------------------
+# 2) Front (dans un autre terminal)
+cd /c/wamp64/www/WITS/web
+npm install   # (si besoin)
+npm run dev -- --host --port 5173
+
+Vérifs rapides dans terminal (ou url dans barre navigation):
+curl http://localhost:8081/api/health
+curl http://localhost:8082/api/health
+curl http://localhost:8081/api/version
+curl http://localhost:8082/api/version
+
+url :
+http://localhost:8082/api/movements
+http://localhost:8082/api/products
+
+
+2) Script de démo (2–3 min, sans friction)
+# A. Liste enrichie
+curl "http://localhost:8081/api/products/enriched?page=1&size=10&q="
+
+# B. Création produit (IN initial = 15)
+curl -s -X POST http://localhost:8081/api/products \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Bloc-notes","sku":"SKU-NOTE-20251002-01","min_threshold":3,"initial_qty":15,"price":3.5}'
+
+# C. OUT > stock (refus attendu)
+curl -i -X POST http://localhost:8082/api/movements \
+  -H "Content-Type: application/json" \
+  -d '{"product_id":<ID>, "type":"OUT", "quantity": 999}'
+
+# D. OUT partiel (OK)
+curl -s -X POST http://localhost:8082/api/movements \
+  -H "Content-Type: application/json" \
+  -d '{"product_id":<ID>, "type":"OUT", "quantity": 5}'
+
+# E. Delete refusé si stock>0
+curl -i -X DELETE http://localhost:8081/api/products/<ID>
+
+# F. OUT du reste pour passer à 0, puis delete OK
+curl -s -X POST http://localhost:8082/api/movements \
+  -H "Content-Type: application/json" \
+  -d '{"product_id":<ID>, "type":"OUT", "quantity": 10}'
+curl -i -X DELETE http://localhost:8081/api/products/<ID>  # 204 attendu
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+3) Reset DB (si besoin de repartir propre)
+
+cd /c/wamp64/www/WITS/infra
+docker compose exec products-api vendor/bin/phinx rollback -c db/phinx.php -e dev -t 0
+docker compose exec products-api vendor/bin/phinx migrate   -c db/phinx.php -e dev
+docker compose exec products-api vendor/bin/phinx seed:run  -c db/phinx.php -s DemoSeeder -e dev

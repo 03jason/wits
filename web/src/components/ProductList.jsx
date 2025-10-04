@@ -1,132 +1,153 @@
-// web/src/components/ProductList.jsx
-import React, { useEffect, useState } from 'react';
-import { api } from '../api/client';
+import React, { useState, useEffect, useCallback } from "react";
+import { apiBase } from "../api/client";
 
-/** Liste des produits (enrichie) + Edit/Delete minimal */
-export default function ProductList({ onSelect, refreshKey }) {
+/**
+ * Hook réutilisable pour charger les produits depuis l’API.
+ */
+function useProducts(page, size, query, refreshKey) {
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-
-    // Chargement initial
-    useEffect(() => { load(1, ''); /* reset page + q si tu veux */ }, []);
-
-    // 🔁 Rechargement quand refreshKey change
-    useEffect(() => { load(1, ''); }, [refreshKey]);
-
-    // Dans editRow/deleteRow on a déjà: await load(page, q);
-
-    const [q, setQ] = useState('');
-    const [page, setPage] = useState(1);
-    const [size] = useState(10);
-    const [items, setItems] = useState([]);
-    const [total, setTotal] = useState(0);
-    const [loading, setLoading] = useState(false);
-
-    const pages = Math.max(1, Math.ceil(total / size));
-
-    const load = async (p = page, query = q) => {
-        setLoading(true);
+    const loadProducts = useCallback(async () => {
         try {
-            const data = await api.products.list(p, size, query);
-            setItems(data.items ?? data.data ?? []);  // tolérant selon payload
-            setTotal(data.total ?? data.count ?? (data.items ? data.items.length : 0));
-        } catch (e) {
-            alert('Erreur chargement produits: ' + e.message);
-            setItems([]); setTotal(0);
+            setLoading(true);
+            setError(null);
+
+            const url = new URL(`${apiBase}/api/products/enriched`);
+            url.searchParams.set("page", page);
+            url.searchParams.set("size", size);
+            if (query) url.searchParams.set("q", query);
+
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
+            const data = await res.json();
+
+            setProducts(data.items || []);
+        } catch (err) {
+            console.error("Erreur de chargement produits:", err);
+            setError(err.message);
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, size, query]);
 
-    useEffect(() => { load(1, ''); }, []); // initial
+    useEffect(() => {
+        loadProducts();
+    }, [loadProducts, refreshKey]);
 
-    const doSearch = (e) => {
-        e?.preventDefault?.();
-        setPage(1);
-        load(1, q);
-    };
+    return { products, loading, error, reload: loadProducts };
+}
 
-    const editRow = async (p) => {
-        const priceStr = prompt('Nouveau prix ?', p.product_price ?? 0);
-        if (priceStr == null) return;
-        const price = parseFloat(priceStr);
-        if (!Number.isFinite(price) || price < 0) return alert('Prix invalide');
+/**
+ * Liste des produits (avec ajout, édition et suppression auto-refresh).
+ */
+export default function ProductList() {
+    const [page, setPage] = useState(1);
+    const [size] = useState(25);
+    const [query, setQuery] = useState("");
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const { products, loading, error, reload } = useProducts(
+        page,
+        size,
+        query,
+        refreshKey
+    );
+
+    // Déclenche un rafraîchissement de la liste
+    const triggerRefresh = () => setRefreshKey(prev => prev + 1);
+
+    // Suppression d’un produit
+    const handleDelete = async id => {
+        if (!window.confirm("Supprimer ce produit ?")) return;
         try {
-            await api.products.update(p.product_id, { price });
-            await load(page, q);
-            alert('Mis à jour');
-        } catch (e) {
-            alert('Échec mise à jour: ' + e.message);
+            const res = await fetch(`${apiBase}/api/products/${id}`, {
+                method: "DELETE",
+            });
+            if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
+            triggerRefresh();
+        } catch (err) {
+            alert("Erreur lors de la suppression : " + err.message);
         }
     };
 
-    const deleteRow = async (p) => {
-        if (!confirm(`Supprimer "${p.product_name}" ? (soft delete)`)) return;
+    // Édition du prix (petit test d’édition simple)
+    const handleEditPrice = async (id, newPrice) => {
         try {
-            await api.products.remove(p.product_id);
-            await load(page, q);
-            alert('Supprimé');
-        } catch (e) {
-            if (String(e.message).includes('cannot_delete_non_empty'))
-                alert('Refus: stock > 0');
-            else
-                alert('Échec suppression: ' + e.message);
+            const res = await fetch(`${apiBase}/api/products/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ price: newPrice }),
+            });
+            if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
+            triggerRefresh();
+        } catch (err) {
+            alert("Erreur lors de la mise à jour : " + err.message);
         }
     };
-
-
 
     return (
-        <div>
-            <div className="row">
-                <input
-                    placeholder="Rechercher (nom / SKU)"
-                    value={q}
-                    onChange={(e) => setQ(e.target.value)}
-                />
-                <button onClick={doSearch} disabled={loading}>Rechercher</button>
-                <span> Total: {total} </span>
-            </div>
+        <div className="card">
+            <h3>Produits</h3>
 
-            <table className="grid" style={{ marginTop: 12 }}>
-                <thead>
-                <tr>
-                    <th>ID</th><th>Nom</th><th>SKU</th><th>Stock</th><th>Seuil</th><th>État</th><th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {items.map((p) => (
-                    <tr key={p.product_id}>
-                        <td>{p.product_id}</td>
-                        <td>{p.product_name}</td>
-                        <td>{p.product_sku}</td>
-                        <td>{p.current_stock ?? p.stock ?? 0}</td>
-                        <td>{p.product_min_threshold ?? p.threshold ?? 0}</td>
-                        <td><span className="badge">{p.is_below_threshold ? 'Alerte' : 'OK'}</span></td>
-                        <td className="row" style={{ gap: 6 }}>
-                            <button onClick={() => onSelect?.(p)}>Sélectionner</button>
-                            <button onClick={() => editRow(p)}>Edit</button>
-                            <button onClick={() => deleteRow(p)}>Delete</button>
-                        </td>
+            <input
+                type="search"
+                placeholder="Rechercher un produit..."
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+            />
+
+            {loading && <p>Chargement...</p>}
+            {error && <p className="error">Erreur : {error}</p>}
+
+            {!loading && !error && (
+                <table className="product-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>SKU</th>
+                        <th>Quantité</th>
+                        <th>Prix</th>
+                        <th>Actions</th>
                     </tr>
-                ))}
-                {items.length === 0 && (
-                    <tr><td colSpan="7">Aucun produit</td></tr>
-                )}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    {products.map(p => (
+                        <tr key={p.product_id}>
+                            <td>{p.product_id}</td>
+                            <td>{p.product_name}</td>
+                            <td>{p.product_sku}</td>
+                            <td>{p.current_stock ?? "?"}</td>
+                            <td>{p.product_price ?? "?"} €</td>
+                            <td>
+                                <button
+                                    onClick={() =>
+                                        handleEditPrice(
+                                            p.product_id,
+                                            prompt("Nouveau prix :", p.product_price)
+                                        )
+                                    }
+                                >
+                                    ✏ Modifier
+                                </button>
+                                <button onClick={() => handleDelete(p.product_id)}>
+                                    🗑 Supprimer
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            )}
 
-            <div className="row" style={{ justifyContent: 'space-between', marginTop: 12 }}>
-                <button
-                    disabled={page <= 1 || loading}
-                    onClick={() => { const np = page - 1; setPage(np); load(np, q); }}
-                >◀ Préc.</button>
-
-                <span>Page {page}/{pages}</span>
-
-                <button
-                    disabled={page >= pages || loading}
-                    onClick={() => { const np = page + 1; setPage(np); load(np, q); }}
-                >Suiv. ▶</button>
+            <div className="pagination">
+                <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>
+                    ◀ Précédent
+                </button>
+                <span>Page {page}</span>
+                <button onClick={() => setPage(p => p + 1)}>Suivant ▶</button>
             </div>
         </div>
     );

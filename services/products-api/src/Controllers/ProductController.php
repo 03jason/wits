@@ -70,68 +70,63 @@ final class ProductController
     }
 
     /** POST /api/products { name, sku?, brand?, price?, category?, location?, min_threshold?, description?, initial_qty? } */
+
     public function create(Request $req, Response $res): Response
     {
-        $b = (array)$req->getParsedBody();
+        $b = (array)($req->getParsedBody() ?? []);
 
-        // Validation minimale
+        // --- validation simple & explicite ---
         $name = trim((string)($b['name'] ?? ''));
         if ($name === '') {
-            $res->getBody()->write(json_encode(['error'=>'name_required'], JSON_UNESCAPED_UNICODE));
-            return $res->withHeader('Content-Type','application/json')->withStatus(422);
+            return json($res, ['error' => 'validation_failed', 'details' => ['name required']], 422);
+        }
+        $sku = isset($b['sku']) ? strtoupper(trim((string)$b['sku'])) : null;
+        if ($sku !== null && !preg_match('/^[A-Z0-9-]{1,64}$/', $sku)) {
+            return json($res, ['error' => 'validation_failed', 'details' => ['sku invalid']], 422);
         }
 
+        $initialQty   = isset($b['initial_qty'])   ? max(0, (int)$b['initial_qty'])   : 0;
+        $minThreshold = isset($b['min_threshold']) ? (int)$b['min_threshold']          : null;
+        $price        = isset($b['price'])         ? (float)$b['price']                : null;
 
         $data = [
-            'product_sku'          => $b['sku'] ?? null,
-            'product_name'         => $name,
-            'product_brand'        => $b['brand'] ?? null,
-            'product_price'        => isset($b['price']) ? (float)$b['price'] : null,
-            'product_category'     => $b['category'] ?? null,
-            'product_description'  => $b['description'] ?? null,
-            'product_location'     => $b['location'] ?? null,
-            'product_min_threshold'=> isset($b['min_threshold']) ? (int)$b['min_threshold'] : null,
-            'product_active'       => true,
+            'product_sku'           => $sku,
+            'product_name'          => $name,
+            'product_brand'         => $b['brand']        ?? null,
+            'product_price'         => $price,
+            'product_category'      => $b['category']     ?? null,
+            'product_description'   => $b['description']  ?? null,
+            'product_location'      => $b['location']     ?? null,
+            'product_min_threshold' => $minThreshold,
+            'product_active'        => true,
         ];
-
-        $initialQty = isset($b['initial_qty']) ? max(0, (int)$b['initial_qty']) : 0;
-        $minThreshold = isset($b['min_threshold']) ? (int)$b['min_threshold'] : null;
-        $price        = isset($b['price']) ? (float)$b['price'] : null;
-
-        $schema = \Respect\Validation\Validator::key('name', \Respect\Validation\Validator::stringType()->length(2,255))
-            ->key('sku', \Respect\Validation\Validator::optional(\Respect\Validation\Validator::stringType()->length(1,64)))
-            ->key('price', \Respect\Validation\Validator::optional(\Respect\Validation\Validator::number()->min(0)))
-            ->key('category', \Respect\Validation\Validator::optional(\Respect\Validation\Validator::stringType()->length(1,64)))
-            ->key('location', \Respect\Validation\Validator::optional(\Respect\Validation\Validator::stringType()->length(1,64)))
-            ->key('min_threshold', \Respect\Validation\Validator::optional(\Respect\Validation\Validator::intVal()->min(0)))
-            ->key('initial_qty', \Respect\Validation\Validator::optional(\Respect\Validation\Validator::intVal()->min(0)));
-        try { $schema->assert($b); }
-        catch (\Throwable $e) { return json($res, ['error'=>'validation_failed','details'=>$e->getMessage()], 422); }
 
         try {
             $created = DB::transaction(function () use ($data, $initialQty) {
                 $p = Product::create($data);
                 if ($initialQty > 0) {
                     DB::table('movements')->insert([
-                        'product_id' => $p->product_id,
-                        'movement_type' => 'IN',
+                        'product_id'        => $p->product_id,
+                        'movement_type'     => 'IN',
                         'movement_quantity' => $initialQty,
-                        'movement_note' => 'Initial stock'
+                        'movement_note'     => 'Initial stock',
                     ]);
                 }
-                return $p->fresh(); // retourne le produit créé
+                return $p->fresh();
             });
 
-            $res->getBody()->write(json_encode($created, JSON_UNESCAPED_UNICODE));
-            return $res->withHeader('Content-Type','application/json')->withStatus(201);
+            if ($sku && \Wits\Models\Product::where('product_sku', $sku)->exists()) {
+                return json($res, ['error'=>'sku_exists','details'=>"SKU '{$sku}' déjà utilisé"], 409);
+            }
+
+
+            return json($res, $created, 201);
 
         } catch (\Throwable $e) {
-            $res->getBody()->write(json_encode([
-                'error'=>'create_failed','message'=>$e->getMessage()
-            ], JSON_UNESCAPED_UNICODE));
-            return $res->withHeader('Content-Type','application/json')->withStatus(400);
+            return json($res, ['error' => 'server_error', 'details' => $e->getMessage()], 500);
         }
     }
+
 
 
 
@@ -174,7 +169,9 @@ final class ProductController
             'product_active'       => isset($b['active']) ? (bool)$b['active'] : $p->product_active,
         ])->save();
 
-        return json($res, $p->fresh(), 200);
+        //return json($res, $p->fresh(), 200);
+        return json($res, $p->toArray(), 200);
+
     }
 
     /** DELETE /api/products/{id} : soft delete (active=0) + refuse si stock > 0 */
@@ -199,6 +196,25 @@ final class ProductController
 
 
 
+
+/** Réponse JSON robuste pour arrays, modèles Eloquent, collections, etc. */
+function json(Response $res, $data, int $status = 200): Response
+{
+    if ($data instanceof Arrayable) {
+        $data = $data->toArray();
+    } elseif ($data instanceof Jsonable) {
+        $res->getBody()->write($data->toJson(JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+        return $res->withHeader('Content-Type', 'application/json')->withStatus($status);
+    } elseif ($data instanceof \JsonSerializable) {
+        $data = $data->jsonSerialize();
+    } elseif (is_object($data)) {
+        // fallback simple
+        $data = (array) $data;
+    }
+
+    $res->getBody()->write(json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+    return $res->withHeader('Content-Type', 'application/json')->withStatus($status);
+}
 
 
 

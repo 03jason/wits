@@ -1,0 +1,17 @@
+1 - CI GitHub Actions – commit le fichier .github/workflows/ci.yml, push et vérifie vert.
+
+2 - README (racine) – sections : démarrage dev, arbo, endpoints, migrations/seeds, tests, CI, variables .env, captures.
+
+3 - Note sécurité OWASP – 1 page (risques → mesures en place : JWT, validation, CORS, ORM, secrets, logs).
+
+4 - Confirmer PUT/DELETE produits
+
+Routes : public/index.php
+
+Méthodes : ProductController::update/delete()
+
+Smoke-tests curl.
+
+5 - Petite UX front (optionnel) : bouton OUT/IN plus clair, toast d’erreur 401/422.
+
+6 - (Plus tard) Déploiement prod : compose prod + Nginx + TLS + AUTH_ENABLED=1.

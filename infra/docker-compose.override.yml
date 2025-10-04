@@ -1,0 +1,9 @@
+services:
+  products-api:
+    volumes: []            # désactive le bind-mount de code
+    environment:
+      APP_ENV: prod
+  movements-api:
+    volumes: []
+    environment:
+      APP_ENV: prod

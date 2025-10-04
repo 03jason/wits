@@ -10,6 +10,9 @@ use Tuupola\Middleware\JwtAuthentication;
 use Firebase\JWT\JWT;
 use Respect\Validation\Validator as v;
 
+use Illuminate\Support\Facades\DB; /* Temporaire, test de vitesse */
+
+
 require __DIR__ . '/../vendor/autoload.php';
 
 // --- App & middlewares de base
@@ -111,10 +114,6 @@ $protect($app->put('/api/products/{id}', [Wits\Controllers\ProductController::cl
 $protect($app->delete('/api/products/{id}', [Wits\Controllers\ProductController::class, 'delete']));
 
 
-$app->get('/api/version', fn($q,$s)=>json($s,[
-    'service'=>'products-api', // adapter
-    'version'=>$_ENV['APP_VERSION'] ?? 'dev'
-]));
 
 $app->get('/api/version', fn($req,$res)=>json($res, [
     'service' => 'products-api',
@@ -123,4 +122,33 @@ $app->get('/api/version', fn($req,$res)=>json($res, [
 
 
 
+/* ----- Test vitesse début ----- */
+
+// 3.1 Ping DB (SELECT 1)
+$app->get('/api/_bench/db-ping', function($req, $res) {
+    $t0 = hrtime(true);
+    $x = DB::select('SELECT 1');
+    $ms = (hrtime(true)-$t0)/1e6;
+    return json($res, ['ok'=>true, 'ms'=>$ms, 'result'=>$x]);
+});
+
+// 3.2 Vue enrichie en SQL brut (bypass Eloquent)
+$app->get('/api/_bench/enriched-raw', function($req, $res) {
+    $t0 = hrtime(true);
+    $rows = DB::select('SELECT * FROM v_products_enriched LIMIT 50');
+    $ms = (hrtime(true)-$t0)/1e6;
+    return json($res, ['count'=>count($rows), 'ms'=>$ms]);
+});
+
+// 3.3 Enriched via Eloquent (mesurer l’overhead ORM)
+$app->get('/api/_bench/enriched-eloquent', function($req, $res) {
+    $t0 = hrtime(true);
+    $rows = \Wits\Models\Product::query()
+        ->select('*') // ou select des colonnes utiles
+        ->limit(50)->get();
+    $ms = (hrtime(true)-$t0)/1e6;
+    return json($res, ['count'=>$rows->count(), 'ms'=>$ms]);
+});
+
+/* ---- Test vitesse fin ---- */
 $app->run();

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createMovement } from '../api/movements';
 import { listProducts } from '../api/products';
+import { emitRefresh } from '../lib/refreshBus';
 
 export default function MovementForm({ onRecorded }) {
     const [type, setType] = useState('IN');
@@ -30,7 +31,8 @@ export default function MovementForm({ onRecorded }) {
                 note: note || undefined
             };
             const r = await createMovement(payload);
-            onRecorded?.(r);
+            emitRefresh('products');   // le stock d’un produit change → on rafraîchit la liste
+            onRecorded?.();
             setQuantity(''); setNote('');
             alert(`${type} enregistré. Stock courant: ${r.stock}`);
         } catch (e2) {
