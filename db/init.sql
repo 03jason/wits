@@ -71,7 +71,7 @@ VALUES
     ('SKU-CHAIR', 'Chair',          NULL,NULL,'furniture', NULL,'C2',1);
 
 INSERT INTO movements (product_id, movement_type, movement_quantity, movement_at, movement_note) VALUES
-                                                                                                     (1,'IN', 12,'2025-09-04 11:28:00','seed'),
+    (1,'IN', 12,'2025-09-04 11:28:00','seed'),
 
 
 ALTER TABLE movements

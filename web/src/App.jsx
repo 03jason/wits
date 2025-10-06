@@ -1,35 +1,28 @@
-import React, { useRef, useState } from "react";
-import ProductList from "./components/ProductList";
-import ProductForm from "./components/ProductForm";
-import MovementForm from "./components/MovementForm";
-import LoginBar from "./components/LoginBar";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-/**
- * Composant principal de l’application WITS.
- * - Structure la page
- * - Gère le rafraîchissement global de la liste produits
- */
+// Import des pages
+import Home from "./siteWits/pages/home";
+import AboutUs from "./siteWits/pages/aboutUs";
+import Login from "./siteWits/pages/login";
+import Products from "./siteWits/pages/products";
+import AddProduct from "./siteWits/pages/addProduct";
+import EditProduct from "./siteWits/pages/editProduct";
+import Movements from "./siteWits/pages/movements";
+import Header from "./siteWits/pages/header"; // ton futur composant commun
+
 export default function App() {
-    const [refreshKey, setRefreshKey] = useState(0);
-    const listRef = useRef();
-
-    const reloadList = () => {
-        setRefreshKey(prev => prev + 1);
-    };
-
     return (
-        <>
-            <header>
-                <h2 style={{ margin: 0 }}>WITS – Gestion de stock</h2>
-                <span className="badge">Demo</span>
-            </header>
-
-            <div className="container">
-                <LoginBar />
-                <ProductForm onCreated={reloadList} />
-                <MovementForm onRecorded={reloadList} />
-                <ProductList key={refreshKey} ref={listRef} />
-            </div>
-        </>
+        <Router>
+            <Header />
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/products/add" element={<AddProduct />} />
+                <Route path="/products/edit/:id" element={<EditProduct />} />
+                <Route path="/movements" element={<Movements />} />
+                <Route path="/about" element={<AboutUs />} />
+            </Routes>
+        </Router>
     );
 }
