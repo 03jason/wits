@@ -1,0 +1,26 @@
+# 0) Depuis la racine du repo
+cd /c/wamp64/www/WITS
+
+# 1) Vérifie l’état
+git status
+
+# 2) Mets-toi à jour sur main (rebase propre)
+git checkout main
+git pull --rebase origin main
+
+# 3) Stage + commit (message clair)
+git add -A
+git commit -m "feat(web): stabilisation du site et navigation possible (routing + NavBar)"
+
+# 4) Push du commit
+git push origin main
+
+# 5) Crée le tag annoté v1.0.4
+git tag -a v1.0.4 -m "v1.0.4 — Stabilisation du site et navigation possible"
+
+# 6) Push du tag
+git push origin v1.0.4
+
+# (optionnel) Vérifs rapides
+git tag -n           # liste des tags + message
+git log --oneline -5 # derniers commits

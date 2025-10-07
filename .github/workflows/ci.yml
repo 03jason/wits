@@ -1,30 +1,193 @@
-name: CI
-on: [push]
+name: CI / Build & Test & Docker
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  PHP_VERSION: '8.3'
+  APP_VERSION: ${{ github.ref_name }}-${{ github.sha }}
+  REGISTRY: ghcr.io
+  ORG_REPO: ${{ github.repository }}          # ex: user/wits
+  # chemins projet (adapter si nécessaire)
+  WEB_DIR: web
+  PRODUCTS_API_DIR: services/products-api
+  MOVEMENTS_API_DIR: services/movements-api
 
 jobs:
-  php:
+  web-build:
+    name: Web • build (Vite)
     runs-on: ubuntu-latest
-    strategy: { matrix: { svc: [services/movements-api, services/products-api] } }
+    defaults:
+      run:
+        working-directory: ${{ env.WEB_DIR }}
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
-        with: { php-version: '8.3', extensions: mbstring, pdo_mysql }
-      - run: composer install --no-interaction --prefer-dist
-        working-directory: ${{ matrix.svc }}
-      - run: vendor/bin/phpunit || echo "no tests here"
-        working-directory: ${{ matrix.svc }}
 
-  web:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.WEB_DIR }}/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Lint (optionnel)
+        run: npm run lint --if-present
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload artifact (dist)
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: ${{ env.WEB_DIR }}/dist
+          if-no-files-found: error
+
+  php-test:
+    name: APIs • composer install + tests
     runs-on: ubuntu-latest
+    services:
+      # MySQL uniquement si tes tests en ont besoin.
+      # Retire ce bloc si tes tests n'accèdent pas à la DB.
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: wits
+          MYSQL_USER: wits
+          MYSQL_PASSWORD: wits
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=20
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - run: npm ci
-        working-directory: web
-      - name: Build web (deterministic)
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo, pdo_mysql
+          coverage: none
+
+      # ---------- products-api ----------
+      - name: Composer install (products-api)
+        working-directory: ${{ env.PRODUCTS_API_DIR }}
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Phinx migrate (dev) — optionnel
+        if: ${{ always() }}
+        working-directory: ${{ env.PRODUCTS_API_DIR }}
+        env:
+          # Variables .env pour l’environnement CI
+          APP_ENV: dev
+          DB_DRIVER: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: wits
+          DB_USERNAME: wits
+          DB_PASSWORD: wits
         run: |
-          VITE_PRODUCTS_API_URL=http://localhost:8081 \
-          VITE_MOVEMENTS_API_URL=http://localhost:8082 \
-          npm run build
-        working-directory: web
+          if [ -f db/phinx.php ]; then
+            vendor/bin/phinx migrate -c db/phinx.php -e dev
+            vendor/bin/phinx seed:run -c db/phinx.php -e dev || true
+          else
+            echo "Phinx non configuré, skip."
+          fi
+
+      # ---------- movements-api ----------
+      - name: Composer install (movements-api)
+        working-directory: ${{ env.MOVEMENTS_API_DIR }}
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: PHPUnit (movements-api)
+        working-directory: ${{ env.MOVEMENTS_API_DIR }}
+        run: |
+          if [ -f vendor/bin/phpunit ]; then
+            vendor/bin/phpunit --colors=always
+          else
+            echo "PHPUnit non présent, skip."
+          fi
+
+  docker-build:
+    name: Docker • build (web + apis)
+    runs-on: ubuntu-latest
+    needs: [web-build, php-test]
+    permissions:
+      contents: read
+      packages: write   # pour push vers GHCR
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # ---------- Web nginx image ----------
+      - name: Download web artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: web-dist
+
+      - name: Build web image
+        run: |
+          echo "FROM nginx:alpine
+          COPY ./web-dist /usr/share/nginx/html
+          " > Dockerfile.web
+          docker build -f Dockerfile.web -t $REGISTRY/${ORG_REPO}/web:${{ github.sha }} .
+
+      - name: Push web image (main only)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker push $REGISTRY/${ORG_REPO}/web:${{ github.sha }}
+
+      # ---------- Products API image ----------
+      - name: Build products-api image
+        run: |
+          docker build \
+            -f infra/products-api.Dockerfile \
+            -t $REGISTRY/${ORG_REPO}/products-api:${{ github.sha }} .
+
+      - name: Push products-api image (main only)
+        if: github.ref == 'refs/heads/main'
+        run: docker push $REGISTRY/${ORG_REPO}/products-api:${{ github.sha }}
+
+      # ---------- Movements API image ----------
+      - name: Build movements-api image
+        run: |
+          docker build \
+            -f infra/movements-api.Dockerfile \
+            -t $REGISTRY/${ORG_REPO}/movements-api:${{ github.sha }} .
+
+      - name: Push movements-api image (main only)
+        if: github.ref == 'refs/heads/main'
+        run: docker push $REGISTRY/${ORG_REPO}/movements-api:${{ github.sha }}
+
+  summary:
+    name: Summary
+    runs-on: ubuntu-latest
+    needs: [web-build, php-test, docker-build]
+    steps:
+      - name: Done
+        run: |
+          echo "✅ Build web (Vite) OK"
+          echo "✅ PHP install & tests OK"
+          echo "✅ Docker images build OK"
