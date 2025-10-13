@@ -1,0 +1,278 @@
+/* =========================================================================
+   MOVEMENTS PAGE — thème légèrement éclairci + correctifs d’UI
+   ======================================================================== */
+
+/* ---- Layout de page ---------------------------------------------------- */
+.mv-grid {
+    --gap: 20px;
+    --radius: 16px;
+
+    /* Thème un peu plus clair */
+    --card-bg: #111827;        /* slate-800 (avant: #0f172a) */
+    --card-border: #1f2937;    /* gray-800 */
+    --ink: #e5e7eb;            /* gray-200 */
+    --muted: #9ca3af;          /* gray-400 */
+    --brand: #22d3ee;          /* cyan-400 */
+    --brand-2: #34d399;        /* emerald-400 */
+    --warn: #fbbf24;           /* amber-400 */
+    --danger: #f87171;         /* red-400 */
+
+    display: grid;
+    gap: var(--gap);
+
+    /* gabarit global (la variante layout-right est utilisée plus bas) */
+    grid-template-columns: 1.7fr 1.3fr;
+    grid-template-areas:
+    "overview stats"
+    "list     list"
+    "info     info";
+    padding: 24px;
+}
+
+/* Variante “list à gauche / colonne droite” (celle que tu utilises) */
+.mv-grid.layout-right {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 4fr 3fr;
+    grid-template-areas:
+    "overview  stats"
+    "list      filters"
+    "list      info";
+}
+
+/* Responsive (pile tout en colonne) */
+@media (max-width: 900px) {
+    .mv-grid.layout-right {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+      "overview"
+      "stats"
+      "filters"
+      "list"
+      "info";
+    }
+}
+
+/* ---- Cartes & zones ---------------------------------------------------- */
+.mv-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.25);
+}
+
+.mv-overview   { grid-area: overview; }
+.mv-stats      { grid-area: stats; }
+.mv-filtercard { grid-area: filters; }
+.mv-list       { grid-area: list; display: flex; flex-direction: column; }
+.mv-info       { grid-area: info; }
+
+/* Titres / muted */
+.mv-title { font-size: 18px; font-weight: 600; color: var(--ink); margin: 0 0 6px; }
+.mv-muted, .muted { color: var(--muted); font-size: 12px; }
+
+/* =========================================================================
+   A — MOST OUT PRODUCT
+   ========================================================================= */
+.mv-overview-wrap {
+    display: grid;
+    grid-template-columns: 1fr 210px; /* un peu moins large pour libérer la droite */
+    align-items: center;
+    gap: 14px;
+}
+
+.mv-kpi { margin: 8px 0 2px; }
+.mv-kpi-value { font-size: 34px; font-weight: 700; color: var(--ink); }
+.mv-kpi-unit { color: var(--muted); margin-left: 6px; }
+.mv-product { margin: 4px 0 0; }
+.mv-code { color: var(--muted); }
+
+.mv-spark { height: 110px; display: grid; place-items: center; }
+.mv-spark-placeholder {
+    width: 100%; height: 100%;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #0c1425, #111827);
+    border: 1px dashed #334155; /* gray-700 */
+    color: #7dd3fc; /* sky-300 */
+    font-size: 12px;
+    display: grid; place-items: center;
+}
+
+/* =========================================================================
+   B — STAT CARDS
+   ========================================================================= */
+.mv-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.mv-stat {
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: #162036; /* un chouïa plus clair que la carte */
+}
+
+.mv-stat-top { display: flex; justify-content: space-between; align-items: center; }
+.mv-stat-label { color: var(--muted); font-size: 12px; }
+
+.mv-badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #0b3a46; color: var(--brand); }
+.mv-badge.pos { background:#0b3f35; color: var(--brand-2); }
+.mv-badge.neg { background:#3b0b0b; color: var(--danger); }
+
+.mv-stat-value { font-weight: 700; font-size: 22px; margin-top: 4px; color: var(--ink); }
+
+/* =========================================================================
+   C — LISTE MOUVEMENTS
+   ========================================================================= */
+
+/* barre d’actions au-dessus de la table (si utilisée) */
+.mv-list-head { display:flex; justify-content: space-between; align-items:center; margin-bottom: 10px; }
+.mv-actions { display: flex; gap: 8px; }
+
+.mv-btn {
+    border: 1px solid var(--card-border);
+    background: #162036;
+    color: var(--ink);
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+.mv-btn.primary {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+
+/* Limiter la hauteur de la LISTE à ~20 lignes avec scroll */
+.mv-table-wrap {
+    max-height: 520px;        /* ~20 lignes selon ta taille de ligne */
+    overflow: auto;
+    border-radius: 10px;
+}
+
+/* Table */
+.mv-table { width: 100%; border-collapse: collapse; }
+.mv-table th, .mv-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--card-border);
+    font-size: 13px;
+    text-align: left;
+    color: var(--ink);
+    background: #121a2c;      /* un cran plus clair que #0f172a */
+}
+.mv-table thead th { color: var(--muted); font-weight: 600; background: #1a2540; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+/* Étiquettes type mouvement */
+.mv-tag {
+    padding: 2px 8px; border-radius: 999px; font-size: 12px;
+    border: 1px solid var(--card-border);
+}
+.mv-tag.in       { background: #0b3f35; color: #34d399; border-color: #14532d; } /* emerald */
+.mv-tag.out      { background: #3a250b; color: #fb923c; border-color: #7c2d12; } /* orange */
+.mv-tag.sales    { background: #2b2155; color: #c4b5fd; border-color: #4c1d95; } /* violet */
+.mv-tag.refund   { background: #2b2155; color: #c4b5fd; border-color: #4c1d95; }
+.mv-tag.purchase { background: #3a370b; color: #facc15; border-color: #854d0e; } /* amber */
+mv-tag.return    { background: #0b3a33; color: #5eead4; border-color: #134e4a; } /* teal */
+.mv-tag.data     { background: #3a0b36; color: #f472b6; border-color: #831843; } /* pink */
+
+/* Sélection persistante + hover */
+.mv-table tbody tr { transition: background-color .12s ease; cursor: pointer; }
+.mv-table tbody tr:hover { background: #0f172a; }
+.mv-table tbody tr.selected {
+    background: #0b2942;              /* bleu pétrole doux */
+    outline: 2px solid #22d3ee33;     /* liseré cyan translucide */
+    outline-offset: -2px;
+}
+.mv-table tbody tr:hover:not(.selected) {
+    background: #0f172a;
+}
+
+/* =========================================================================
+   D — PANNEAU D’INFO (MovementInformation)
+   ========================================================================= */
+.mv-info-wrap { display: grid; gap: 12px; }
+.mv-info-head { display:flex; justify-content:space-between; align-items:center; }
+.mv-info-grid { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+
+.mv-info-note {
+    border:1px solid var(--card-border); border-radius:12px; padding:10px 12px; background:#162036;
+}
+.mv-info-pre {
+    margin: 6px 0 0; padding: 10px 12px; border-radius: 12px;
+    border: 1px solid var(--card-border);
+    background: #0c1425;
+    color: #e5e7eb;
+    max-height: 280px; overflow: auto; font-size: 12px;
+}
+.mv-info-diff { display:grid; gap:8px; }
+.mv-info-diff-head { display:flex; justify-content:space-between; align-items:center; }
+.mv-diff-table { width:100%; border-collapse:collapse; }
+.mv-diff-table th, .mv-diff-table td {
+    padding: 8px 10px; border-bottom: 1px solid var(--card-border); font-size: 13px; color: var(--ink);
+}
+.mv-diff-table thead th { color: var(--muted); background:#1a2540; text-align:left; }
+
+/* =========================================================================
+   E — FILTRES
+   ========================================================================= */
+.mv-filter {
+    margin-bottom: 12px;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    background: #0c1425;      /* un fond un poil plus clair qu’avant */
+    padding: 12px;
+    display: grid;
+    gap: 10px;
+
+
+}
+
+.mv-filter-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.mv-filter-field { display: grid; gap: 6px; }
+.mv-filter-field > label { font-size: 12px; color: var(--muted); }
+
+.mv-filter-field input[type="text"],
+.mv-filter-field input[type="date"],
+.mv-filter-field input[type="number"],
+.mv-filter-field select {
+    background: #121a2c;
+    border: 1px solid var(--card-border);
+    color: var(--ink);
+    border-radius: 8px;
+    padding: 8px 10px;
+    outline: none;
+}
+.mv-filter-field input:focus,
+.mv-filter-field select:focus { border-color: #22d3ee; }
+
+/* Alignement des cases à cocher — corrige l’agrandissement au clic */
+.mv-filter-checkbox { align-items: end; }
+.mv-check {
+    display: inline-flex;
+    align-items: center;      /* <== centre verticalement */
+    gap: 8px;
+    user-select: none;
+    color: var(--ink);
+    line-height: 1;           /* <== empêche la “prise de place” dynamique */
+}
+.mv-check input[type="checkbox"]{
+    width: 16px; height: 16px;        /* <== taille fixe */
+    flex: 0 0 16px;                   /* <== évite que ça s’étire */
+    accent-color: #22d3ee;
+    box-sizing: content-box;
+}
+
+.mv-filter-actions { display: flex; align-items: end; justify-content: flex-end; }
+
+/* Responsive filtres */
+@media (max-width: 1024px) { .mv-filter-row { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px)  { .mv-filter-row { grid-template-columns: 1fr;    } }

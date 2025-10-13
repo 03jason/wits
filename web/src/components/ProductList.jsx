@@ -5,6 +5,7 @@ import { apiBase } from "../api/client";
  * Hook réutilisable pour charger les produits depuis l’API.
  */
 function useProducts(page, size, query, refreshKey) {
+
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);

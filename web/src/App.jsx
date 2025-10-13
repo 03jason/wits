@@ -1,23 +1,22 @@
 import React, { useRef, useState } from "react";
 import { Routes, Route, Link, Navigate } from "react-router-dom";
 
-
-
 // Composant
 import ProductList from "./components/ProductList";
 import ProductForm from "./components/ProductForm";
 import MovementForm from "./components/MovementForm";
 import LoginBar from "./components/LoginBar";
 import NavBar from "./siteWits/components/NavBar.jsx";
-///
+/// Composant qui aide pour localiser et séparer élement
 import { useLocation } from "react-router-dom";
+import Footer from "./siteWits/components/Footer.jsx"
 
 // Les pages
 import Home from "./siteWits/pages/Home.jsx";
 import TestPage from "./siteWits/pages/TestPage.jsx";
 import Login from "./siteWits/pages/Login.jsx";
 import Products from "./siteWits/pages/Products.jsx";
-import Movements from "./siteWits/pages/Movements.jsx";
+import MovementsPage from "./siteWits/pages/Movements.jsx";
 import EditProduct from "./siteWits/pages/EditProduct.jsx";
 import AboutUs from "./siteWits/pages/AboutUs.jsx";
 
@@ -64,7 +63,11 @@ export default function App() {
 
     return (
         <>
-            {showNav && <NavBar />}
+
+
+            {/* Enlever le commentaire montre une session active pour l'exemple */}
+            {showNav && <NavBar /*user={{ name: "Jason Rasri" }} */ />}
+
 
             <Routes>
                 {/* Redirige la racine vers /demo pour garder ton écran actuel par défaut */}
@@ -75,13 +78,14 @@ export default function App() {
                 <Route path="/demo" element={<Demo />} />
                 <Route path="*" element={<div style={{ padding: 16 }}>404</div>} />
                 <Route path="/productList" element={<Products />} />
-                <Route path="/movementList" element={<Movements />} />
+                <Route path="/movements" element={<MovementsPage />} />
                 <Route path="/editProduct" element={<EditProduct />} />
                 <Route path="/aboutUs" element={<AboutUs />} />
 
-
-
             </Routes>
+
+            <Footer/>
+
         </>
     );
 }

@@ -1,0 +1,245 @@
+/* ============================================================
+   PAGE PRODUITS — Grilles & Style (cohérent avec le thème sombre)
+   Fichiers concernés :
+   - Products.jsx
+   - components/products/FilterBar.jsx
+   - components/products/MovementQuickForm.jsx
+   - components/products/ProductsTable.jsx
+   - components/products/ProductInformation.jsx
+   ============================================================ */
+
+:root {
+    --bg: #0d1524;
+    --panel: #111b2d;
+    --card: #0f1a2c;
+    --card-2: #0c1727;
+    --muted: #9fb0c9;
+    --text: #e7eefc;
+    --line: #1e2a40;
+    --accent: #22d3ee;
+    --accent-2: #4f46e5;
+    --danger: #ef4444;
+    --danger-dark: #8b1c1c;
+
+    /* —— Ratios modifiables (option B) —— */
+    --header-cols: 3fr 2fr;   /* Filtres | Mouvement rapide */
+    --content-cols: 2fr 3fr;  /* Table   | Fiche produit   */
+}
+
+/* —— Page container —— */
+.products-page {
+    padding: 16px;
+    display: grid;
+    gap: 16px;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* ============================================================
+   1) HEADER (grid) —  Filtres (gauche)  |  Mouvement (droite)
+   ============================================================ */
+.products-header {
+    display: grid;
+    grid-template-columns: var(--header-cols);  /* ← changeable */
+    gap: 16px;
+}
+
+/* ============================================================
+   2) CONTENT (grid) —  Table (gauche)  |  Fiche produit (droite)
+   ============================================================ */
+.products-content {
+    display: grid;
+    grid-template-columns: var(--content-cols); /* ← changeable */
+    gap: 16px;
+}
+
+/* ============================================================
+   Cartes génériques (.card)
+   ============================================================ */
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.03);
+}
+.card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(to bottom, rgba(255,255,255,.03), transparent);
+}
+.card__header h2 { margin: 0; font-size: 1.1rem; letter-spacing: 0.2px; }
+.card__body { padding: 14px; }
+
+/* ============================================================
+   FILTER BAR (formulaire de filtres)
+   ============================================================ */
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field--span2 { grid-column: span 2; }
+
+.field label {
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+.field input,
+.field select,
+.field textarea {
+    background: var(--card-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 8px;
+    outline: none;
+}
+.field textarea { resize: vertical; }
+
+.filter-actions {
+    margin-top: 8px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* ============================================================
+   QUICK MOVEMENT (form)
+   ============================================================ */
+.qm-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+.qm-grid .field--span2 { grid-column: span 2; }
+
+.qm-actions {
+    margin-top: 8px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* ============================================================
+   TABLE PRODUITS
+   ============================================================ */
+.products-table .table-wrapper {
+    max-height: 520px;
+    overflow: auto;
+    border-top: 1px solid var(--line);
+}
+
+.products-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+.products-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--card-2);
+    color: var(--muted);
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+}
+.products-table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+}
+.products-table tbody tr {
+    cursor: pointer;
+    transition: background-color .12s ease, color .12s ease;
+}
+.products-table tbody tr:hover { background: rgba(79,70,229,.08); }
+.products-table tbody tr.is-selected {
+    background: rgba(79,70,229,.18);
+    box-shadow: inset 3px 0 0 var(--accent-2);
+}
+.cell-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.products-table .products-table__meta { display:flex; align-items:center; gap:10px; }
+.products-table .products-table__meta .spacer { flex:1; }
+
+/* ============================================================
+   PRODUCT INFORMATION (fiche à droite)
+   ============================================================ */
+.product-info .product-info__body {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 16px;
+    padding: 14px;
+}
+
+/* image / placeholder */
+.product-info__media img {
+    width: 140px; height: 140px; object-fit: cover;
+    border-radius: 10px; border: 1px solid var(--line);
+}
+.product-info__media .img-placeholder {
+    width: 140px; height: 140px; display:grid; place-items:center;
+    border-radius: 10px; border: 1px dashed var(--line);
+    color: var(--muted); background: var(--card-2);
+}
+
+/* grille des champs */
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+.info-item--span2 { grid-column: span 2; }
+.info-label { font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
+.info-value { font-weight: 600; }
+
+/* description */
+.info-desc { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); }
+
+/* badges */
+.badge {
+    display:inline-flex; align-items:center; gap:6px;
+    font-size: .75rem; font-weight: 700; padding: 3px 8px;
+    border-radius: 999px; margin-left: 8px;
+    background: rgba(255,255,255,.06); border: 1px solid var(--line);
+}
+.badge--in    { color:#22c55e; border-color: rgba(34,197,94,.35); }
+.badge--out   { color:#ef4444; border-color: rgba(239,68,68,.35); }
+.badge--sales { color:#f59e0b; border-color: rgba(245,158,11,.35); }
+.badge--data  { color:#22d3ee; border-color: rgba(34,211,238,.35); }
+.badge--burn  { color:#a855f7; border-color: rgba(168,85,247,.35); }
+
+/* actions bas de carte */
+.product-info__actions {
+    display:flex; justify-content:flex-end; gap:10px;
+    padding: 12px 14px; border-top: 1px solid var(--line);
+    background: var(--card-2);
+    border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;
+}
+
+/* boutons */
+.btn {
+    appearance: none;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.05);
+    color: var(--text);
+    padding: 8px 12px;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform .08s ease, background-color .12s ease, border-color .12s ease;
+}
+.btn:hover { background: rgba(255,255,255,.08); }
+.btn:active { transform: translateY(1px); }
+.btn--primary {
+    background: linear-gradient(180deg, var(--accent), #1bb8cf);
+    border-color: #1bb8cf;
+    color: #06202a;
+}
+.btn--primary:hover { filter: brightness(1.05); }
+.btn--danger {
+    background: linear-gradient(180deg, var(--danger), #dc2626);
+    border-color: #dc2626;
+    color: #fff;
+}
+.btn--danger:hover { background: var(--danger-dark); border-color: var(--danger-dark); }

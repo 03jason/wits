@@ -1,3 +1,128 @@
+
+
+7-10-25
+
+
+0) Objectif
+
+Livrer un MVP fiable, déployable, démontrable :
+
+Front React routé proprement (Home, Products, Movements, Login, About/Contact).
+
+CRUD produits + mouvements opérationnels.
+
+Pagination, recherche, badges “alerte seuil”.
+
+Docker + CI simples.
+
+Démo fluide (scénario de 3–5 min).
+
+1) Stabiliser l’architecture front (anti-page blanche)
+
+# 1) Layouts & routes
+
+AppLayout (avec NavBar + Footer) et BareLayout (login sans NavBar).
+
+HashRouter (URLs #/... => pas de config serveur).
+
+Une page = export default (évite les erreurs d’import).
+
+# 2) Garde-fous
+
+Error Boundary pour éviter l’écran vide :
+--- jsx
+import React from 'react';
+export class ErrorBoundary extends React.Component {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(err, info) { console.error(err, info); }
+  render() {
+    if (this.state.hasError) return <div style={{padding:16}}>Un problème est survenu.</div>;
+    return this.props.children;
+  }
+}
+---
+Utilisation (dans main.jsx) :
+--- jsx
+<ErrorBoundary>
+  <HashRouter><App /></HashRouter>
+</ErrorBoundary>
+---
+# 3) ESLint + Types minimaux
+
+Installe ESLint pour casser vite sur les erreurs de syntaxe/export.
+--- bash
+cd web
+npm i -D eslint @eslint/js eslint-plugin-react
+npx eslint --init
+---
+Active la règle d’erreur sur imports non résolus.
+
+2) Pages prioritaires (squelettes prêts à brancher)
+
+- Home : héro + CTA (Products / Movements) + section “À propos” + “Contact”.
+- Products : table + search + pagination (client) + actions (edit/delete).
+- Movements : table + filtre par produit + création IN/OUT.
+- Login : email + password → appelle /api/login (on peut garder la version simple).
+- About, Contact : statiques (propre, concis).
+
+3) Client API centralisé (finir les lenteurs & erreurs)
+
+- Un seul fichier web/src/lib/apiClient.js :
+-- BaseURL depuis import.meta.env.
+-- fetchJson avec gestion des erreurs (4xx/5xx), timeout, et log.
+-- Méthodes : getProducts({page,size,q}), createProduct(), updateProduct(), deleteProduct(), getMovements(), createMovement().
+| Bonus futur : react-query pour cache + revalidation sans rafraîchir la page.
+
+4) UX “pas de refresh manuel”
+
+- Après create/update/delete, mettre à jour la liste en mémoire (state) sans recharger :
+-- setProducts(prev => [newProduct, ...prev])
+-- Pour update/delete, map/filter côté client, puis refetch léger en arrière-plan.
+
+5) Performances
+
+- Coté API : l’endpoint /api/products/enriched est OK (log rapide).
+- Côté front :
+-- Déclencher un seul fetch par interaction (éviter les doubles appels).
+-- size=25 par défaut, bouton “Charger plus”.
+-- Debounce sur la recherche (300ms).
+-- Pas d’images lourdes pour l’instant.
+
+6) Déploiement (simple, réaliste)
+
+- Itération 1 (gratuite) :
+-- Front : Netlify/Vercel (build npm run build).
+-- API : Railway / Render gratuitement (deux services : products & movements), DB MySQL managée (Railway/PlanetScale).
+-- .env distincts (ne jamais exposer les secrets du back au front).
+
+- CI minimal : build web + composer install + phpunit + build images Docker (GHCR) — déjà dans ton workflow.
+
+7) Démo script (3–5 minutes)
+
+1. Login (admin).
+2. Créer un produit (IN initial).
+3. Faire un OUT > seuil → badge alerte.
+4. Edit prix → liste se met à jour (sans refresh).
+5. Page mouvements : filtre par produit.
+6. Pagination / recherche produits.
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+
+OBSOLÈTE
+
+
 1 - CI GitHub Actions – commit le fichier .github/workflows/ci.yml, push et vérifie vert.
 
 2 - README (racine) – sections : démarrage dev, arbo, endpoints, migrations/seeds, tests, CI, variables .env, captures.

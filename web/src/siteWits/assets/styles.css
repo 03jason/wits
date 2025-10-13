@@ -14,7 +14,7 @@ button { cursor:pointer; }
 .help { color:#93c5fd; font-size:12px; }
 
 
-/* --------             ---------------*/
+/* ####################   PAGE D'ACCEUIL (HOME.JSX)          ###################### */
 
 /* ====== Design system rapide ====== */
 :root{
@@ -23,7 +23,7 @@ button { cursor:pointer; }
     --bg-hero: #0b1524;
     --text: #e9eef6;
     --text-dark: #0f1b2a;
-    --muted: #9fb2cc;
+    --muted: #1664cf;
     --brand: #2ec4b6;
     --brand-2: #5aa9e6;
     --card-1: #1d3557;
@@ -233,4 +233,268 @@ textarea{ resize: vertical; }
     .hero__grid{ grid-template-columns: 1fr; }
     .hero-card{ min-height: 220px; }
     .form-row{ grid-template-columns: 1fr; }
+}
+
+
+
+/* ####################   NavBar / Barre navigation  (NavBar.JSX)   ###################### */
+
+/* ===== NavBar ===== */
+.navbar {
+    background: #0f172a;            /* bleu nuit */
+    border-bottom: 1px solid #1f2937;
+}
+
+.navbar__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #e5e7eb;                 /* gris clair */
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* Titre un peu plus grand et même fonte que les liens */
+.navbar__brand {
+
+    /* -- Ancien modèle --
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    font-size: 1.25rem;             /* plus grand */  /*
+    color: #e5e7eb;
+
+    */
+
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: #e5e7eb;
+    margin-right: auto;
+
+}
+
+/* Liens poussés à droite */
+.navbar__links {
+    margin-left: auto;              /* pousse le bloc de liens à droite */
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    font-weight: 700;               /* même “feeling” que le titre */
+    letter-spacing: 0.3px;
+}
+
+/* Style des liens (pas de soulignement) */
+.navlink {
+    color: #e5e7eb;
+    text-decoration: none;          /* <= PAS de soulignement */
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: background-color .15s ease, opacity .15s ease;
+    opacity: 0.9;
+}
+.navlink:hover { opacity: 1; }
+.navlink--active {
+    background: #1f2937;            /* discret “actif” */
+}
+
+/* Zone actions (à droite du tout) */
+.navbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 10px;
+}
+
+/* Bouton Login */
+.navbar__loginBtn {
+    appearance: none;
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #0f172a;
+    background: #e5e7eb;
+    border: 1px solid transparent;
+    padding: 6px 12px;
+    border-radius: 999px;
+    transition: transform .12s ease, opacity .15s ease;
+}
+.navbar__loginBtn:hover { opacity: 0.95; }
+.navbar__loginBtn:active { transform: translateY(1px); }
+
+/* Avatar (initiales) */
+.navbar__avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #22d3ee;           /* cyan */
+    color: #0f172a;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 0 2px #0f172a; /* anneau foncé pour contraster */
+    user-select: none;
+}
+
+
+
+
+/* ####################   Footer  (Footer.JSX)    ###################### */
+
+
+
+/* Footer minimal, propre, responsive. */
+
+.wits-footer {
+    margin-top: 48px;
+    background: #0b1220;         /* fond sombre élégant */
+    color: #e9eef7;               /* texte clair */
+    border-top: 1px solid rgba(255,255,255,0.08);
+    font-size: 14px;
+}
+
+.wits-footer__grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 20px;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 24px;
+}
+
+.wits-footer__col {
+    grid-column: span 12;
+}
+
+@media (min-width: 768px) {
+    .wits-footer__col { grid-column: span 3; }
+}
+
+.wits-footer__brand {
+    margin: 0 0 8px;
+    font-size: 20px;
+    letter-spacing: 1px;
+}
+
+.wits-footer__title {
+    margin: 0 0 10px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #a7b3c6;
+}
+
+.wits-footer__text {
+    margin: 0 0 10px;
+    line-height: 1.6;
+    color: #cfd7e6;
+}
+
+.wits-footer__meta {
+    margin: 4px 0 0;
+    color: #93a0b5;
+    font-size: 12px;
+}
+
+.wits-footer__links,
+.wits-footer__contact {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.wits-footer__links li,
+.wits-footer__contact li {
+    margin: 6px 0;
+}
+
+.wits-footer a {
+    color: #d8e2f1;
+    text-decoration: none;
+}
+
+.wits-footer a:hover {
+    text-decoration: underline;
+}
+
+.wits-footer__social {
+    margin-top: 10px;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    color: #cfd7e6;
+}
+
+.wits-footer__bar {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: #a7b3c6;
+}
+
+.wits-footer__bar nav a {
+    color: #a7b3c6;
+}
+
+
+
+/*   #############################  About Us /  ABOUTUS   #################################*/
+
+:root{
+    --about-ink: #0e2433;
+    --about-hero-bg: #5994bf;
+    --about-content-bg: #0f2a3a;   /* plus foncé */
+    --about-content-ink: #e9f2f7;
+    --about-muted: #3a7595;
+    --about-max: 1100px;
+}
+
+.about{ color: var(--about-ink); }
+
+.about__container{
+    max-width: var(--about-max);
+    margin: 0 auto;
+    padding: 32px 20px;
+}
+
+.about__hero{
+    background: var(--about-hero-bg);
+    border-bottom: 1px solid #e6eef3;
+}
+
+.about__hero h1{
+    font-size: 36px;
+    letter-spacing: .2px;
+    margin: 6px 0 8px;
+}
+
+.about__subtitle{
+    color: var(--about-muted);
+    margin: 0;
+}
+
+.about__content{
+    background: var(--about-content-bg);
+    color: var(--about-content-ink);
+    padding: 36px 0 60px;
+}
+
+.about__content h2{
+    margin: 0 0 8px;
+    font-size: 22px;
+}
+
+.about__content p{
+    line-height: 1.7;
+    margin: 0;
+    opacity: .95;
 }

@@ -79,7 +79,7 @@ export default function Home() {
                                 courantes.
                             </p>
                             <div className="about__cta">
-                                <Link to="/about" className="btn btn--primary">
+                                <Link to="/aboutUs" className="btn btn--primary">
                                     Plus d’info
                                 </Link>
                             </div>

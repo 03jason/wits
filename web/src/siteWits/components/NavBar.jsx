@@ -2,46 +2,48 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 
 /**
- * Barre de navigation principale.
- * - Utilise NavLink pour le styling "actif".
- * - Minimaliste, réutilisable.
+ * Props:
+ *  - user: { name: "Jason Rasri" } | null  -> si présent, on affiche les initiales
  */
-export default function NavBar() {
-    const linkBase = "px-3 py-2 rounded hover:underline";
-    const active = ({ isActive }) =>
-        `${linkBase} ${isActive ? "bg-gray-800 text-white" : "text-gray-200"}`;
+export default function NavBar({ user = null }) {
+    const activeClass = ({ isActive }) =>
+        "navlink" + (isActive ? " navlink--active" : "");
+
+
+
+    // TODO logique plus tard : isLoggedIn / initials
+    const isLoggedIn = false;
+    const initials = "JW";
+
 
     return (
-        <header style={{ background: "#0f172a", borderBottom: "1px solid #1f2937" }}>
-            <div
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    padding: "10px 16px",
-                    color: "#e5e7eb",
-                }}
-            >
-                {/* Logo / titre */}
-                <div style={{ fontWeight: 700, letterSpacing: 0.5 }}>WITS</div>
+        <header className="navbar">
+            <div className="navbar__inner">
+                {/* Marque / Titre (pas un lien) */}
+                <div className="navbar__brand">WITS</div>
 
-                {/* Liens */}
-                <nav style={{ display: "flex", gap: 8 }}>
-                    <NavLink to="/home" className={active}>Home</NavLink>
-                    <NavLink to="/productList" className={active}>Products</NavLink>
-                    <NavLink to="/movementList" className={active}>Movements</NavLink>
-                    <NavLink to="/test" className={active}>Test</NavLink>
-                    <NavLink to="/demo" className={active}>Demo</NavLink>
-                    <NavLink to="/aboutUs" className={active}>About</NavLink>
-                    <NavLink to="/contact" className={active}>Contact</NavLink>
+                {/* Liens (poussés à droite) */}
+                <nav className="navbar__links">
+                    <NavLink to="/home" className={activeClass}>Accueil</NavLink>
+                    <NavLink to="/productList" className={activeClass}>Produits</NavLink>
+                    <NavLink to="/movements" className={activeClass}>Mouvements</NavLink>
+                    <NavLink to="/test" className={activeClass}>Page test</NavLink>
+                    <NavLink to="/demo" className={activeClass}>Demo</NavLink>
+                    <NavLink to="/aboutUs" className={activeClass}>À propos</NavLink>
+                    {/* <NavLink to="/contact" className={activeClass}>Contact</NavLink> */}
                 </nav>
 
-                {/* Spacer */}
-                <div style={{ marginLeft: "auto" }} />
-
-                {/* Actions (ex: login) */}
-                <div style={{ display: "flex", gap: 8 }}>
-                    <NavLink to="/login" className={active}>Login</NavLink>
+                {/* Actions (login / avatar) */}
+                <div className="navbar__actions">
+                    {user ? (
+                        <span className="navbar__avatar" title={user.name}>
+              {initials || "U"}
+            </span>
+                    ) : (
+                        <NavLink to="/login" className="navbar__loginBtn">
+                            Login
+                        </NavLink>
+                    )}
                 </div>
             </div>
         </header>
