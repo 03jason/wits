@@ -1,23 +1,15 @@
-FROM php:8.3-cli-alpine
-RUN docker-php-ext-install pdo pdo_mysql
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+FROM php:8.3-cli
+
+# Dossier de travail dans le conteneur
 WORKDIR /var/www
-EXPOSE 8081
-# Mis en commentaire car utilisé dans test en bas
-# CMD ["php","-S","0.0.0.0:8081","-t","public"]
 
+# Copie uniquement le dossier products-api (pas tout le projet)
+COPY ./products-api/ .
 
-# Dépendances optimisées
-RUN php -v >/dev/null 2>&1 || true
+# Installation de Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
-RUN composer install --no-dev --prefer-dist --no-interaction \
-    --optimize-autoloader --classmap-authoritative
 
-# OPcache
-RUN printf "opcache.enable=1\nopcache.enable_cli=1\nopcache.validate_timestamps=0\n" \
-  > /usr/local/etc/php/conf.d/opcache.ini
+# Installation des dépendances PHP
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
-ENV APP_ENV=prod
-
-# adapte le port pour movements-api
-CMD ["php","-S","0.0.0.0:8081","-t","public"]
+CMD ["php", "-S", "0.0.0.0:8081", "-t", "public"]
