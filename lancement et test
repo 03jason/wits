@@ -17,3 +17,9 @@ npm run dev
 Ouvre :
 http://localhost:5173
 http://localhost:5173/#/home
+http://localhost:8080/
+
+---------------
+
+Accès db depuis le terminal (avoir vérifié que Docker est actif) :
+docker exec -it infra-db-1 mysql -u root -p

@@ -25,3 +25,6 @@ EXPOSE 8081
 
 # Lancer le serveur PHP intégré (mode dev)
 CMD ["php", "-S", "0.0.0.0:8081", "-t", "public"]
+
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --ignore-platform-reqs
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --ignore-platform-reqs
