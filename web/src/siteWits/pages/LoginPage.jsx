@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 
 
-export default function Login() {
+export default function LoginPage() {
 
     return(
 

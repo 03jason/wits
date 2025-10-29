@@ -1,7 +1,7 @@
 import React from "react";
 import "../assets/styles.css"; // (voir le CSS plus bas)
 
-export default function AboutUs() {
+export default function AboutUsPage() {
     return (
         <main className="about">
             {/* Bandeau titre */}

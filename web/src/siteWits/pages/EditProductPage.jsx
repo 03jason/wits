@@ -1,4 +1,4 @@
-// web/src/siteWits/pages/Home.jsx
+// web/src/siteWits/pages/HomePage.jsx
 import { Link } from "react-router-dom";
 import React, { useRef, useState } from "react";
 import LoginBar from "../../components/LoginBar.jsx";
@@ -6,7 +6,7 @@ import ProductForm from "../../components/ProductForm.jsx";
 import MovementForm from "../../components/MovementForm.jsx";
 import ProductList from "../../components/ProductList.jsx";
 
-export default function EditProduct() {
+export default function EditProductPage() {
 
 
     return (

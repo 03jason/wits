@@ -129,7 +129,12 @@
    ========================================================================= */
 
 /* barre d’actions au-dessus de la table (si utilisée) */
-.mv-list-head { display:flex; justify-content: space-between; align-items:center; margin-bottom: 10px; }
+.mv-list-head {
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    margin-bottom: 10px;
+}
 .mv-actions { display: flex; gap: 8px; }
 
 .mv-btn {
@@ -162,9 +167,21 @@
     text-align: left;
     color: var(--ink);
     background: #121a2c;      /* un cran plus clair que #0f172a */
+
 }
-.mv-table thead th { color: var(--muted); font-weight: 600; background: #1a2540; }
-.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.mv-table thead th {
+    /* Ajout pour laisser les catégories visibles lors du scroll*/
+    /* A améliorer */
+    position: sticky;
+    top: 0;
+    color: var(--muted);
+    font-weight: 600;
+    background: #1a2540;
+}
+.mono {
+    font-family:
+        ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
 
 /* Étiquettes type mouvement */
 .mv-tag {
@@ -276,3 +293,4 @@ mv-tag.return    { background: #0b3a33; color: #5eead4; border-color: #134e4a; }
 /* Responsive filtres */
 @media (max-width: 1024px) { .mv-filter-row { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 640px)  { .mv-filter-row { grid-template-columns: 1fr;    } }
+

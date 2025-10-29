@@ -9,7 +9,7 @@ import ProductInformation from "../components/products/ProductInformation.jsx";
 /* CSS (IMPORTANT) */
 import "../assets/products.css";
 
-export default function Products() {
+export default function ProductsPage() {
     // —— Ratios modifiables (option A : via constantes JS) ——
     // Tu peux changer ici, ex: "2fr 1fr" etc.
     const HEADER_COLS = "3fr 2fr";   // ≈ 60/40 : (Filtres | Mouvement)

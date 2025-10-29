@@ -12,13 +12,15 @@ import { useLocation } from "react-router-dom";
 import Footer from "./siteWits/components/Footer.jsx"
 
 // Les pages
-import Home from "./siteWits/pages/Home.jsx";
+import HomePage from "./siteWits/pages/HomePage.jsx";
 import TestPage from "./siteWits/pages/TestPage.jsx";
-import Login from "./siteWits/pages/Login.jsx";
-import Products from "./siteWits/pages/Products.jsx";
-import MovementsPage from "./siteWits/pages/Movements.jsx";
-import EditProduct from "./siteWits/pages/EditProduct.jsx";
-import AboutUs from "./siteWits/pages/AboutUs.jsx";
+import LoginPage from "./siteWits/pages/LoginPage.jsx";
+import ProductsPage from "./siteWits/pages/ProductsPage.jsx";
+import MovementsPage from "./siteWits/pages/MovementsPage.jsx";
+import EditProductPage from "./siteWits/pages/EditProductPage.jsx";
+import AboutUsPage from "./siteWits/pages/AboutUsPage.jsx";
+import ContactPage from "./siteWits/pages/ContactPage.jsx";
+import AddProductPage from "./siteWits/pages/AddProductPage.jsx";
 
 
 
@@ -72,15 +74,17 @@ export default function App() {
             <Routes>
                 {/* Redirige la racine vers /demo pour garder ton écran actuel par défaut */}
                 <Route path="/" element={<Navigate to="/demo" replace />} />
-                <Route path="/home" element={<Home />} />
+                <Route path="/home" element={<HomePage />} />
                 <Route path="/test" element={<TestPage />} />
-                <Route path="/login" element={<Login />} />
+                <Route path="/login" element={<LoginPage />} />
                 <Route path="/demo" element={<Demo />} />
                 <Route path="*" element={<div style={{ padding: 16 }}>404</div>} />
-                <Route path="/productList" element={<Products />} />
+                <Route path="/productList" element={<ProductsPage />} />
                 <Route path="/movements" element={<MovementsPage />} />
-                <Route path="/editProduct" element={<EditProduct />} />
-                <Route path="/aboutUs" element={<AboutUs />} />
+                <Route path="/editProduct" element={<EditProductPage />} />
+                <Route path="/aboutUs" element={<AboutUsPage />} />
+                <Route path="/addProduct" element={<AddProductPage />} />
+                <Route path="/contact" element={<ContactPage />} />
 
             </Routes>
 

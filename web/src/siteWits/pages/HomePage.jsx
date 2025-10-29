@@ -1,4 +1,4 @@
-// web/src/siteWits/pages/Home.jsx
+// web/src/siteWits/pages/Page.jsx
 import { Link } from "react-router-dom";
 import React, { useRef, useState } from "react";
 import LoginBar from "../../components/LoginBar.jsx";
@@ -6,9 +6,9 @@ import ProductForm from "../../components/ProductForm.jsx";
 import MovementForm from "../../components/MovementForm.jsx";
 import ProductList from "../../components/ProductList.jsx";
 
-import Products from "./Products.jsx";
+import ProductsPage from "./ProductsPage.jsx";
 
-export default function Home() {
+export default function HomePage() {
 
     // (facultatif) petit état pour le formulaire de contact
     const [form, setForm] = useState({

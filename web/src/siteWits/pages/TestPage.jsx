@@ -1,4 +1,4 @@
-// web/src/siteWits/pages/Home.jsx
+// web/src/siteWits/pages/HomePage.jsx
 import { Link } from "react-router-dom";
 import React, { useRef, useState } from "react";
 
