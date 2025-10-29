@@ -1,15 +1,27 @@
+# -------------------------------
+# PRODUCTS API - Dockerfile
+# -------------------------------
 FROM php:8.3-cli
 
-# Dossier de travail dans le conteneur
+# Définir le dossier de travail
 WORKDIR /var/www
 
-# Copie uniquement le dossier products-api (pas tout le projet)
+# Copier le contenu du dossier API (et non tout le projet)
 COPY ./products-api/ .
 
-# Installation de Composer
+# Installer les extensions PHP nécessaires à Slim + Eloquent
+RUN apt-get update && \
+    docker-php-ext-install pdo pdo_mysql && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Installer Composer globalement
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
-# Installation des dépendances PHP
-RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+# Installer les dépendances du projet
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --ignore-platform-reqs
 
+# Port exposé (utile si tu veux tester directement l’API)
+EXPOSE 8081
+
+# Lancer le serveur PHP intégré (mode dev)
 CMD ["php", "-S", "0.0.0.0:8081", "-t", "public"]
