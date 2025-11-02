@@ -2,10 +2,6 @@ import React, { useRef, useState } from "react";
 import { Routes, Route, Link, Navigate } from "react-router-dom";
 
 // Composant
-import ProductList from "./components/ProductList";
-import ProductForm from "./components/ProductForm";
-import MovementForm from "./components/MovementForm";
-import LoginBar from "./components/LoginBar";
 import NavBar from "./siteWits/components/NavBar.jsx";
 /// Composant qui aide pour localiser et séparer élement
 import { useLocation } from "react-router-dom";
@@ -21,6 +17,8 @@ import EditProductPage from "./siteWits/pages/EditProductPage.jsx";
 import AboutUsPage from "./siteWits/pages/AboutUsPage.jsx";
 import ContactPage from "./siteWits/pages/ContactPage.jsx";
 import AddProductPage from "./siteWits/pages/AddProductPage.jsx";
+
+
 
 
 

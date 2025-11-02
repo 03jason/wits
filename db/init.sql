@@ -170,6 +170,7 @@ SELECT
     p.product_sku,
     p.product_name,
     p.product_brand,
+    p.product_description,
     p.product_price,
     p.category_id,
     c.category_name,
@@ -195,7 +196,61 @@ FROM products p
          LEFT JOIN locations  l    ON l.location_id  = p.location_id
          LEFT JOIN v_product_stock s ON s.product_id = p.product_id;
 
+
+/* ---------------------------------------------------------
+   11) VUE: v_movements_enriched — vue front/report
+   --------------------------------------------------------- */
+CREATE OR REPLACE VIEW v_movements_enriched AS
+SELECT
+    m.movement_id,
+    m.product_id,
+    p.product_name,
+    m.quantity,
+    u.user_id,
+    CONCAT(u.first_name, ' ', u.last_name) AS user_full_name,
+    u.user_pseudo,
+    m.type_code,
+    mt.type_label AS type_label,
+    m.note AS movement_note,
+    m.created_at AS movement_date
+FROM movements m
+         LEFT JOIN products p ON p.product_id = m.product_id
+         LEFT JOIN users u ON u.user_id = m.user_id
+         LEFT JOIN movement_types mt ON mt.type_code = m.type_code
+ORDER BY m.created_at DESC;
+
 /* ---------------------------------------------------------
    11) FIN & RÉACTIVATION DES CLEFS
    --------------------------------------------------------- */
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+
+/* ---------------------------------------------------------
+   INFO - si une view dois être changer,
+   utiliser ce code et adapater au truc qu'on modif.
+   A utiliser dans localhost 8080 dans la db docker
+   --------------------------------------------------------- */
+/*
+
+CREATE OR REPLACE VIEW v_products_enriched AS
+SELECT
+    p.product_id,
+    p.product_sku,
+    p.product_name,
+    p.product_brand,
+    p.product_description,
+    p.product_price,
+    p.category_id,
+    c.category_name,
+    p.location_id,
+    l.location_name,
+    s.current_stock,
+    p.product_min_threshold,
+    p.product_active
+FROM products p
+LEFT JOIN categories c ON c.category_id = p.category_id
+LEFT JOIN locations  l ON l.location_id = p.location_id
+LEFT JOIN v_product_stock s ON s.product_id = p.product_id;
+
+ */

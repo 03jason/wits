@@ -3,7 +3,7 @@
    ========================================================= */
 SET NAMES utf8mb4; SET FOREIGN_KEY_CHECKS=0;
 
-/* Repère produits (extraits) :
+/* Repère produits (extraits base init) :
 1 Chaise (INDE)             2 Écran 24" (MEDIA)       3 Rubik’s (JOUET)
 4 Eau 50cl (NOUR)           5 Crème avocat (COSM)     6 Perceuse (BRICO)
 7 Robot cuisine (MEDIA)     8 Faux cactus (INDE)      9 Chaise ext. (EXJA)
@@ -19,6 +19,31 @@ SET NAMES utf8mb4; SET FOREIGN_KEY_CHECKS=0;
 */
 
 INSERT INTO movements (product_id, type_code, quantity, note, user_id, created_at) VALUES
+
+-- 0) stocks négatifs → on compense + marge pour atteindre ~50 max
+(1,  'IN', 22, 'reset seed', 2,'2025-09-01 07:00:00'),
+(3,  'IN', 27, 'reset seed', 3,'2025-09-01 07:00:00'),
+(5,  'IN', 30, 'reset seed', 2,'2025-09-01 07:00:00'),
+(7,  'IN', 19, 'reset seed', 3,'2025-09-01 07:00:00'),
+(8,  'IN', 34, 'reset seed', 3,'2025-09-01 07:00:00'),
+(9,  'IN', 28, 'reset seed', 2,'2025-09-01 07:00:00'),
+(10, 'IN', 23, 'reset seed', 1,'2025-09-01 07:00:00'),
+(11, 'IN', 26, 'reset seed', 1,'2025-09-01 07:00:00'),
+(13, 'IN', 37, 'reset seed', 1,'2025-09-01 07:00:00'),
+(14, 'IN', 33, 'reset seed', 1,'2025-09-01 07:00:00'),
+(16, 'IN', 41, 'reset seed', 2,'2025-09-01 07:00:00'),
+(17, 'IN', 25, 'reset seed', 3,'2025-09-01 07:00:00'),
+(18, 'IN', 38, 'reset seed', 2,'2025-09-01 07:00:00'),
+
+(19, 'IN', 45, 'init seed', 1,'2025-09-01 07:00:00'),  -- -25 → +45
+(20, 'IN', 42, 'ini seed', 2,'2025-09-01 07:00:00'),  -- -7  → +42
+(21, 'IN', 47, 'init seed', 3,'2025-09-01 07:00:00'),  -- -15 → +47
+(22, 'IN', 39, 'init seed', 3,'2025-09-01 07:00:00'),  -- -12 → +39
+(23, 'IN', 50, 'init seed', 3,'2025-09-01 07:00:00'),  -- -6  → +50
+(27, 'IN', 24, 'init seed', 3,'2025-09-01 07:00:00'),  -- 0   → +24
+(32, 'IN', 44, 'init seed', 2,'2025-09-01 07:00:00'),  -- -10 → +44
+(33, 'IN', 36, 'init seed', 3,'2025-09-01 07:00:00'),  -- -5  → +36
+
 -- 1) Appro initial (début septembre)
 (2,'PURCHASE',20,'Appro écrans FHD',1,'2025-09-01 09:05:00'),
 (12,'PURCHASE',15,'Appro enceintes Bluetooth',1,'2025-09-01 09:10:00'),

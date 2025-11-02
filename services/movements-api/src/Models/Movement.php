@@ -1,6 +1,5 @@
 <?php
-// Modèle Eloquent : table movements
-namespace Wits\Models;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -8,12 +7,15 @@ class Movement extends Model
 {
     protected $table = 'movements';
     protected $primaryKey = 'movement_id';
-    public $timestamps = false; // movement_at géré côté DB
+    public $timestamps = false;
+
     protected $fillable = [
-        'product_id','movement_type','movement_quantity','movement_at','movement_note'
+        'product_id','type_code','quantity','note',
+        'resulting_stock','meta_before','meta_after','created_at'
     ];
+
     protected $casts = [
-        'product_id' => 'int',
-        'movement_quantity' => 'int',
+        'meta_before' => 'array',
+        'meta_after'  => 'array',
     ];
 }

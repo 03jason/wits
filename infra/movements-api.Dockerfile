@@ -5,7 +5,8 @@ FROM php:8.3-cli
 
 WORKDIR /var/www
 
-COPY ./movements-api/ .
+
+COPY ../services/movements-api/ .
 
 # Installer les dépendances système nécessaires à PDO, Composer et MySQL
 RUN apt-get update && \

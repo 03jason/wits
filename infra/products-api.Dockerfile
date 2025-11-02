@@ -5,7 +5,7 @@ FROM php:8.3-cli
 
 WORKDIR /var/www
 
-COPY ./products-api/ .
+COPY ../services/products-api/ .
 
 # Installer les dépendances système nécessaires avant d'ajouter les extensions PHP
 RUN apt-get update && \

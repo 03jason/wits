@@ -19,7 +19,7 @@ import React, { useMemo } from "react";
  */
 export default function FilterMovements({ value, onChange, onReset }) {
     const types = useMemo(
-        () => ["ALL","IN","OUT","SALES","REFUND","PURCHASE","RETURN","DATA","BURN"],
+        () => ["ALL","IN","OUT","SALE","REFUND","PURCHASE","RETURN","DATA","BURN"],
         []
     );
 
