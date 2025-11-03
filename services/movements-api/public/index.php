@@ -1,48 +1,73 @@
 <?php
 declare(strict_types=1);
 
-use DI\Container;
 use Slim\Factory\AppFactory;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-// charge .env s'il existe
-if (file_exists(__DIR__ . '/../.env')) {
-    (Dotenv\Dotenv::createImmutable(__DIR__ . '/..'))->load();
+/**
+ * Mini chargeur .env (zéro dépendance) — charge seulement si les variables
+ * ne sont pas déjà présentes dans l'environnement du conteneur.
+ */
+$envFile = __DIR__ . '/../.env';
+if (is_readable($envFile)) {
+    foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+        $line = trim($line);
+        if ($line === '' || $line[0] === '#' || !str_contains($line, '=')) continue;
+        [$k, $v] = explode('=', $line, 2);
+        $k = trim($k); $v = trim($v);
+        if (getenv($k) === false) {
+            putenv("$k=$v");
+            $_ENV[$k] = $_SERVER[$k] = $v;
+        }
+    }
 }
 
-$container = new Container();
+/** Boot Eloquent */
+$capsule = new Capsule();
+$capsule->addConnection([
+    'driver'    => getenv('DB_DRIVER')   ?: 'mysql',
+    'host'      => getenv('DB_HOST')     ?: 'db',
+    'database'  => getenv('DB_DATABASE') ?: 'wits',
+    'username'  => getenv('DB_USERNAME') ?: 'root',
+    'password'  => getenv('DB_PASSWORD') ?: 'root',
+    'charset'   => 'utf8mb4',
+    'collation' => 'utf8mb4_unicode_ci',
+    'prefix'    => '',
+]);
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
 
-/**
- * Enregistre le PDO dans le container.
- * C'EST ÇA QUI MANQUAIT : sans ça, $this->db est null dans le controller.
- */
-$container->set(PDO::class, function () {
-    $host = $_ENV['DB_HOST'] ?? 'db';
-    $port = (int)($_ENV['DB_PORT'] ?? 3306);
-    $db   = $_ENV['DB_DATABASE'] ?? 'wits';
-    $user = $_ENV['DB_USERNAME'] ?? 'root';
-    $pass = $_ENV['DB_PASSWORD'] ?? 'root';
-
-    $dsn = "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4";
-
-    $pdo = new PDO($dsn, $user, $pass, [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ]);
-
-    return $pdo;
-});
-
-AppFactory::setContainer($container);
 $app = AppFactory::create();
 
-// middleware de base
-$app->addBodyParsingMiddleware();
-$app->addRoutingMiddleware();
+/** Erreurs + traces en dev */
 $app->addErrorMiddleware(true, true, true);
 
-// Charger les routes
+/** CORS minimal pour Vite/localhost */
+$app->add(function ($request, $handler) {
+    $response = $handler->handle($request);
+    $origin = $request->getHeaderLine('Origin') ?: '*';
+    $response = $response
+        ->withHeader('Access-Control-Allow-Origin', $origin)
+        ->withHeader('Vary', 'Origin')
+        ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        ->withHeader('Access-Control-Allow-Credentials', 'true');
+
+    if ($request->getMethod() === 'OPTIONS') {
+        return $response->withStatus(204);
+    }
+    return $response;
+});
+
+/** Healthcheck */
+$app->get('/health', function ($req, $res) {
+    $res->getBody()->write(json_encode(['status' => 'ok']));
+    return $res->withHeader('Content-Type', 'application/json');
+});
+
+/** Routes applicatives */
 (require __DIR__ . '/../src/routes.php')($app);
 
 $app->run();
