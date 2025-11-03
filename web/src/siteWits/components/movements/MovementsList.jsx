@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 
 /**
+ * Affiche la liste des mouvements sous forme de tableau.
  * Props:
  *  - rows: []
  *  - onSelect: (row)=>void
  *  - selectedId?: string | number
  */
 export default function MovementsList({ rows = [], onSelect, selectedId: controlledSel }) {
-    // si le parent ne fournit pas selectedId, on garde un état local
     const [localSel, setLocalSel] = useState(null);
     const selectedId = controlledSel ?? localSel;
 
@@ -18,20 +18,17 @@ export default function MovementsList({ rows = [], onSelect, selectedId: control
 
     const tagClass = (t) => `mv-tag ${String(t || "").toLowerCase()}`;
 
-    function formatDate(dateString) {
+    const formatDate = (dateString) => {
         if (!dateString) return "-";
         const d = new Date(dateString);
         if (isNaN(d)) return "-";
         const day = String(d.getDate()).padStart(2, "0");
         const month = String(d.getMonth() + 1).padStart(2, "0");
         const year = d.getFullYear();
-        return `${day}-${month}-${year}`;
-    }
-
-
-
-
-
+        const hours = String(d.getHours()).padStart(2, "0");
+        const mins = String(d.getMinutes()).padStart(2, "0");
+        return `${day}-${month}-${year} ${hours}:${mins}`;
+    };
 
     return (
         <>
@@ -57,21 +54,25 @@ export default function MovementsList({ rows = [], onSelect, selectedId: control
                     </tr>
                     </thead>
                     <tbody>
-                    {rows.map((r) => (
-                        <tr
-                            key={r.id}
-                            onClick={() => handleClick(r)}
-                            className={selectedId === r.id ? "selected" : ""}
-                        >
-                            <td className="mono">{r.id}</td>
-                            <td>{r.date}</td>
-                            <td>{r.product}</td>
-                            <td><span className={tagClass(r.type)}>{r.type}</span></td>
-                            <td className="mono">{r.qty}</td>
-                            <td>{r.by}</td>
-                            <td>{r.note || ""}</td>
-                        </tr>
-                    ))}
+                    {rows.length === 0 ? (
+                        <tr><td colSpan="7" className="text-center text-gray-500">Aucun mouvement trouvé.</td></tr>
+                    ) : (
+                        rows.map((r) => (
+                            <tr
+                                key={r.id}
+                                onClick={() => handleClick(r)}
+                                className={selectedId === r.id ? "selected" : ""}
+                            >
+                                <td className="mono">{r.id}</td>
+                                <td>{formatDate(r.date)}</td>
+                                <td>{r.product}</td>
+                                <td><span className={tagClass(r.type)}>{r.type}</span></td>
+                                <td className="mono">{r.qty}</td>
+                                <td>{r.by}</td>
+                                <td>{r.note || ""}</td>
+                            </tr>
+                        ))
+                    )}
                     </tbody>
                 </table>
             </div>

@@ -5,8 +5,6 @@ import MovementsList from "../components/movements/MovementsList.jsx";
 import MovementInformation from "../components/movements/MovementInformation.jsx";
 import FilterMovements from "../components/movements/FilterMovements.jsx";
 import { fetchMovements } from "../api/movements.js";
-
-/* avant */
 import "../assets/movements.css";
 
 export default function MovementsPage() {
@@ -15,6 +13,8 @@ export default function MovementsPage() {
     const [filters, setFilters] = useState({
         q: "", type: "ALL", from: "", to: "", minQty: "", maxQty: "", by: "", withNote: false,
     });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const resetFilters = () =>
         setFilters({ q: "", type: "ALL", from: "", to: "", minQty: "", maxQty: "", by: "", withNote: false });
@@ -22,8 +22,16 @@ export default function MovementsPage() {
     // --- Chargement initial depuis l’API
     useEffect(() => {
         (async () => {
-            const data = await fetchMovements();
-            setMovements(data);
+            try {
+                setLoading(true);
+                const data = await fetchMovements();
+                setMovements(data);
+            } catch (e) {
+                console.error(e);
+                setError("Impossible de charger les mouvements");
+            } finally {
+                setLoading(false);
+            }
         })();
     }, []);
 
@@ -39,13 +47,13 @@ export default function MovementsPage() {
         const withNote = !!filters.withNote;
 
         return movements.filter((r) => {
-            if (t !== "ALL" && String(r.type_code || r.type).toUpperCase() !== t) return false;
+            if (t !== "ALL" && String(r.type_code || "").toUpperCase() !== t) return false;
             if (q) {
                 const hay = `${r.product_name || ""} ${r.note || ""}`.toLowerCase();
                 if (!hay.includes(q)) return false;
             }
             if (fromTs || toTs) {
-                const ts = new Date(r.created_at || r.date).getTime();
+                const ts = new Date(r.created_at).getTime();
                 if (fromTs && ts < fromTs) return false;
                 if (toTs && ts > toTs) return false;
             }
@@ -57,6 +65,10 @@ export default function MovementsPage() {
         });
     }, [movements, filters]);
 
+    if (error) {
+        return <div className="text-red-600 text-center mt-10">{error}</div>;
+    }
+
     return (
         <div className="mv-grid layout-right">
             <section className="mv-card mv-overview"><MostOutProduct data={{}} /></section>
@@ -65,21 +77,25 @@ export default function MovementsPage() {
                 <FilterMovements value={filters} onChange={setFilters} onReset={resetFilters} />
             </section>
             <section className="mv-card mv-list">
-                <div className="mv-table-wrap">
-                    <MovementsList
-                        rows={filteredRows.map((r) => ({
-                            id: `MV-${r.movement_id}`,
-                            date: r.created_at,
-                            product: r.product_name,
-                            type: r.type_code,
-                            qty: r.quantity,
-                            by: r.user_name || "—",
-                            note: r.note,
-                        }))}
-                        onSelect={setSelected}
-                        selectedId={selected?.id}
-                    />
-                </div>
+                {loading ? (
+                    <p className="text-center text-gray-500">Chargement des mouvements...</p>
+                ) : (
+                    <div className="mv-table-wrap">
+                        <MovementsList
+                            rows={filteredRows.map((r) => ({
+                                id: `MV-${r.movement_id}`,
+                                date: r.created_at,
+                                product: r.product_name,
+                                type: r.type_code,
+                                qty: r.quantity,
+                                by: r.user_name || "—",
+                                note: r.note,
+                            }))}
+                            onSelect={setSelected}
+                            selectedId={selected?.id}
+                        />
+                    </div>
+                )}
             </section>
             <section className="mv-card mv-info">
                 <MovementInformation movement={selected} />
