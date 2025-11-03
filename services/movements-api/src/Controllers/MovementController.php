@@ -1,46 +1,56 @@
 <?php
-declare(strict_types=1);
-
 namespace App\Controllers;
 
 use PDO;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Psr7\Request;
+use Slim\Psr7\Response;
 
-final class MovementController
+class MovementController
 {
-    private PDO $db;
+    private $db;
 
-    public function __construct(PDO $db)
+    public function __construct()
     {
-        $this->db = $db;
+        // Lecture du fichier .env
+        $envPath = __DIR__ . '/../../.env';
+        if (file_exists($envPath)) {
+            $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($lines as $line) {
+                if (strpos(trim($line), '=') !== false) {
+                    [$name, $value] = explode('=', trim($line), 2);
+                    $_ENV[$name] = $value;
+                }
+            }
+        }
+
+        // Connexion PDO manuelle
+        $host = $_ENV['DB_HOST'] ?? 'db';
+        $port = $_ENV['DB_PORT'] ?? '3306';
+        $dbname = $_ENV['DB_DATABASE'] ?? 'wits';
+        $user = $_ENV['DB_USERNAME'] ?? 'root';
+        $pass = $_ENV['DB_PASSWORD'] ?? 'root';
+
+        try {
+            $this->db = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $user, $pass);
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (\PDOException $e) {
+            die("DB connection failed: " . $e->getMessage());
+        }
     }
 
-    /**
-     * GET /api/movements
-     * Retourne les mouvements déjà enrichis par la vue SQL.
-     */
+    // === Liste des mouvements enrichis ===
     public function index(Request $request, Response $response): Response
     {
-        // si la vue existe comme tu l’as créée :
-        // CREATE OR REPLACE VIEW v_movements_enriched AS ...
-        $sql = <<<SQL
-SELECT
-    movement_id,
-    product_name,
-    quantity,
-    user_name,
-    created_at,
-    note,
-    type_code
-FROM v_movements_enriched
-ORDER BY created_at DESC
-SQL;
+        try {
+            $query = $this->db->query("SELECT * FROM v_movements_enriched ORDER BY movement_id DESC");
+            $rows = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        $stmt = $this->db->query($sql);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $response->getBody()->write(json_encode($rows, JSON_UNESCAPED_UNICODE));
-        return $response->withHeader('Content-Type', 'application/json');
+            $response->getBody()->write(json_encode($rows));
+            return $response->withHeader('Content-Type', 'application/json');
+        } catch (\Throwable $e) {
+            $error = ['error' => 'Erreur lors de la récupération des mouvements', 'details' => $e->getMessage()];
+            $response->getBody()->write(json_encode($error));
+            return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
+        }
     }
 }

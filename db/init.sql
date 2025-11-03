@@ -207,7 +207,7 @@ SELECT
     p.product_name,
     m.quantity,
     u.user_id,
-    CONCAT(u.first_name, ' ', u.last_name) AS user_full_name,
+    CONCAT(u.first_name, ' ', u.last_name) AS username,
     u.user_pseudo,
     m.type_code,
     mt.type_label AS type_label,

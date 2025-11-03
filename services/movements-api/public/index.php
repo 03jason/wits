@@ -42,8 +42,7 @@ $app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();
 $app->addErrorMiddleware(true, true, true);
 
-// charge les routes
-$routes = require __DIR__ . '/../src/routes.php';
-$routes($app);
+// Charger les routes
+(require __DIR__ . '/../src/routes.php')($app);
 
 $app->run();
