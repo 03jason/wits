@@ -206,18 +206,15 @@ SELECT
     m.product_id,
     p.product_name,
     m.quantity,
-    u.user_id,
-    CONCAT(u.first_name, ' ', u.last_name) AS username,
-    u.user_pseudo,
+    CONCAT(u.first_name, ' ', u.last_name) AS user_name,
     m.type_code,
     mt.type_label AS type_label,
-    m.note AS movement_note,
-    m.created_at AS movement_date
-FROM movements m
-         LEFT JOIN products p ON p.product_id = m.product_id
-         LEFT JOIN users u ON u.user_id = m.user_id
-         LEFT JOIN movement_types mt ON mt.type_code = m.type_code
-ORDER BY m.created_at DESC;
+    m.note,
+    m.created_at
+FROM movements AS m
+         LEFT JOIN products        AS p  ON p.product_id = m.product_id
+         LEFT JOIN users           AS u  ON u.user_id    = m.user_id
+         LEFT JOIN movement_types  AS mt ON mt.type_code = m.type_code;
 
 /* ---------------------------------------------------------
    11) FIN & RÉACTIVATION DES CLEFS

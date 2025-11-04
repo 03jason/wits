@@ -31,37 +31,45 @@ export default function MovementsList({ rows = [], onSelect, selectedId: control
     };
 
     return (
-        <>
-            <div className="mv-list-head">
-                <h3 className="mv-title">Derniers mouvements</h3>
-                <div className="mv-actions">
-                    <button className="mv-btn">Exporter</button>
-                    <button className="mv-btn primary">Nouveau mouvement</button>
+        <section className="card movements-table">
+            {/* Barre d’en-tête similaire à ProductsTable */}
+            <header className="card__header">
+                <h2>Mouvements</h2>
+                <div className="movements-table__meta">
+                    <span>{rows.length} résultat(s)</span>
+                    <div className="spacer" />
+                    <button className="btn">Exporter</button>
+                    <button className="btn btn--primary">Nouveau mouvement</button>
                 </div>
-            </div>
+            </header>
 
-            <div className="mv-table-wrap">
-                <table className="mv-table">
+            {/* Table scrollable */}
+            <div className="table-wrapper">
+                <table>
                     <thead>
                     <tr>
-                        <th>ID</th>
+                        <th style={{ width: 64 }}>ID</th>
                         <th>Date</th>
                         <th>Produit</th>
                         <th>Type</th>
-                        <th>Qté</th>
+                        <th style={{ width: 80 }}>Qté</th>
                         <th>Par</th>
                         <th>Note</th>
                     </tr>
                     </thead>
                     <tbody>
                     {rows.length === 0 ? (
-                        <tr><td colSpan="7" className="text-center text-gray-500">Aucun mouvement trouvé.</td></tr>
+                        <tr>
+                            <td colSpan="7" style={{ opacity: 0.7, padding: 16 }}>
+                                Aucun mouvement trouvé.
+                            </td>
+                        </tr>
                     ) : (
                         rows.map((r) => (
                             <tr
                                 key={r.id}
                                 onClick={() => handleClick(r)}
-                                className={selectedId === r.id ? "selected" : ""}
+                                className={selectedId === r.id ? "is-selected" : ""}
                             >
                                 <td className="mono">{r.id}</td>
                                 <td>{formatDate(r.date)}</td>
@@ -76,6 +84,7 @@ export default function MovementsList({ rows = [], onSelect, selectedId: control
                     </tbody>
                 </table>
             </div>
-        </>
+        </section>
     );
+
 }

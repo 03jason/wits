@@ -152,11 +152,14 @@
 }
 
 /* Limiter la hauteur de la LISTE à ~20 lignes avec scroll */
+/* ~20 lignes selon ta taille de ligne */
+/* --- Obsolète 04-11-25 crée une deuxième barre scroll
 .mv-table-wrap {
-    max-height: 520px;        /* ~20 lignes selon ta taille de ligne */
+    max-height: 520px;
     overflow: auto;
     border-radius: 10px;
 }
+ */
 
 /* Table */
 .mv-table { width: 100%; border-collapse: collapse; }
@@ -310,3 +313,55 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* ============================================================
+   TABLE MOUVEMENTS — alignée sur le style ProductsTable
+   ============================================================ */
+.movements-table .table-wrapper {
+    max-height: 520px;
+    overflow: auto;
+    border-top: 1px solid var(--card-border);
+}
+
+.movements-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.movements-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #1a2540; /* couleur déjà cohérente avec ton thème */
+    color: var(--muted);
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.movements-table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.movements-table tbody tr {
+    cursor: pointer;
+    transition: background-color .12s ease, color .12s ease;
+}
+
+.movements-table tbody tr:hover {
+    background: rgba(79,70,229,.08);
+}
+
+.movements-table tbody tr.is-selected {
+    background: rgba(79,70,229,.18);
+    box-shadow: inset 3px 0 0 var(--brand);
+}
+
+.movements-table__meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.movements-table__meta .spacer { flex: 1; }

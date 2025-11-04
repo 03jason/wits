@@ -26,6 +26,8 @@ class MovementEnriched extends Model
         'type_label',
         'note',
         'created_at',
+        'meta_before',
+        'meta_after'
     ];
 
     /** Casts utiles pour l’API */
@@ -34,5 +36,7 @@ class MovementEnriched extends Model
         'product_id'  => 'integer',
         'quantity'    => 'integer',
         'created_at'  => 'datetime:Y-m-d H:i:s',
+        'meta_before' => 'array',
+        'meta_after'  => 'array',
     ];
 }
